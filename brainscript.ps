@@ -8,7 +8,7 @@
 /read-file { (r) file max-size string readstring true eq {(code zu lang) =} if } def
 
 
-% array value -- array
+% array value -- array(all set to value)
 /init-array {
 	exch dup 						% value arr arr
 	3 1 roll 						% arr v arr
@@ -22,10 +22,10 @@
 } def
 
 
-
+% "filename" -- dict 0 0
 /bf-init {
-	3 dict <<
-	(bf-in) stack 4 -1 roll read-file			% do we need filename later? use 3 index otherwise
+	<<
+	(bf-in) 3 -1 roll read-file			% do we need filename later? use x index otherwise
 	(bf-tape) max-size array 0 init-array
 	(bf-out) max-size array
 	>>
