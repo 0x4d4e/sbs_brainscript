@@ -1,14 +1,26 @@
 % Brainfuck interpreter/debugger in Postscript
 %
+% 
+%
+% Fabian Grünbichler - 0828562
+% Matthias Neumayr 	 - 0825199
 %
 
 /max-size 30000 def
 
 
-/read-file { (r) file max-size string readstring true eq {(code zu lang) =} if } def
 
 
-% array value -- array(all set to value)
+/read-file
+%Stack: filename -- content
+{ (r) file max-size string readstring true eq {(code zu lang) =} if } def
+
+
+% 1st test, don't expect it to work ;)
+/read-stdin { (%stdin) (r) file 2 string readstring stack true eq {(input error) =} if } def
+
+
+% array value -- array(all elements set to value)
 /init-array {
 	exch dup 						% value arr arr
 	3 1 roll 						% arr v arr
@@ -22,18 +34,26 @@
 } def
 
 
-% "filename" -- dict 0 0
-/bf-init {
-	<<
-	(bf-in) 3 -1 roll read-file			% do we need filename later? use x index otherwise
-	(bf-tape) max-size array 0 init-array
-	(bf-out) max-size array
-	>>
-	0
-	0
+% (filename) -- array 0
+/bf-read-file
+{ read-file 0 } def
+
+
+% -- tape 0
+/bf-init-tape
+{ max-size array 0 init-array 0 } def
+
+
+/bf-run-file {
+	bf-read-file	% (code) 0
+	bf-init-tape	% (code) 0 tape 0
+	%...
 } def
 
 
+% (code) -- 
 /bf-run {
-	bf-init
+	0				% (code) 0
+	bf-init-tape	% (code) 0 tape 0
+	%...
 } def
