@@ -1,0 +1,40 @@
+% Brainfuck interpreter/debugger in Postscript
+%
+%
+
+/max-size 30000 def
+
+/read-file { (r) file max-size string readstring true eq {(code zu lang) =} if } def
+
+/2dup {exch dup 3 2 roll dup 3 1 roll} def
+
+
+% array value -- array
+/init-array {
+	exch dup 						% value arr arr
+	3 1 roll 						% arr v arr
+	dup 0 1 3 2 roll length 1 sub 	% a v a 0 1 l-1
+	{ 								% a v a i
+		2dup  						% a v a i a i
+		4 index 					% a v a i a i v
+		put pop 					% a v a
+	} for
+	pop pop 						% a
+} def
+
+
+
+/bf-init {
+	3 dict <<
+	(bf-tape) max-size array 0 init-array
+	(bf-in) stack (foobar.bf) read-file
+	(bf-out) max-size array
+	>>
+} def
+
+
+/bf-run {
+	bf-init
+} def
+
+(foobar.bf) read-file
