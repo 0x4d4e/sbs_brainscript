@@ -29,7 +29,8 @@
 
 
 
-/err-loop { (\nFailed to find matching ']'!) = } def
+/err-jump { (\nFailed to find matching ']'!) = } def
+/err-loop { (\nFailed to find matching '['!) = } def
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -196,14 +197,15 @@
 
 
 
-/jump
+/jump-r
+% Stack tape ti code ci -- tape ti code cin
 {
 	2swap							% get tape
 	2 copy get 0 eq 				% compare current value to 0
 	{
-		2swap jump-loop 			% if 0 -> move instruction pointer after ]
-		{ inc }
-		{ err-loop } ifelse
+		2swap jump-end				% if 0 -> move instruction pointer after ]
+		{ inc }						% position of matching ] returned, increment ci
+		{ err-jump } ifelse			% no matching ] found, ci should be at end
 	}
 	{
 		2swap inc 					% else move ip + 1
@@ -212,9 +214,8 @@
 
 
 
-/jump-loop
+/jump-end
 % Stack: code ci -- code ci-next success
-% TODO: add boolean return value for success status
 {
 	/lc 1 def 						% loopcount
 
@@ -231,16 +232,15 @@
 
 		lc 0 eq 					% check loopcount
 		{ exit }					% exit and leave loop index on stack
-		{ pop } 					% remove loop index if matching ] not found
-		ifelse
+		{ exch dup length dec 3 -1 roll exch over ne { pop } if } ifelse				% don't remove loop index after last run
 	} for
 
-	lc 0 eq dup false eq {exch dup length 3 -1 roll} if
+	lc 0 eq 						% get result status, lc == 0 => success
 } def
 
 
 
-/loop-e
+/jump-l
 {
 	(TODO: handle ]) = exit
 } def
@@ -259,8 +259,8 @@
 	60 		{ left }							% <
 	62 		{ right }							% >
 
-	91 		{ jump }							% [
-	93 		{ loop }							% ]
+	91 		{ jump-r }							% [
+	93 		{ jump-l }							% ]
 
 	%TODO: # as breakpoint, ! sometimes recognised (??)
 
