@@ -1,3 +1,5 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
 % Brainfuck interpreter/debugger in Postscript
 %
 %
@@ -5,13 +7,33 @@
 % Fabian Grünbichler - 0828562
 % Matthias Neumayr 	 - 0825199
 %
+%
 
+
+
+
+
+% TODO: 
+%	- output/graphics
+%	- modes (stepwise, continue, )
+% 	- breakpoints (#)
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Globals
 
 /max-size 30000 def
 /output max-size string def
 
 
-% helpers
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Helpers
+
 /over   { 1 index 					     } bind def
 /rot    { 3 -1 roll                      } bind def
 /dec    { 1 sub                          } bind def
@@ -22,14 +44,18 @@
 
 
 /read-file
-%Stack: filename -- content
-{ (r) file max-size string readstring {(code zu lang) =} if } def
+% Stack: (filename) --(content)
+{ 
+	(r) file max-size string readstring {(input too long) =} if
+} def
 
 
 /read-stdin
-% Stack: -- char
+% Stack: -- (char)
 % TODO: fails if more than one char, read more and throw rest away?
-{ (%stdin) (r) file 1 string readstring false eq {(input error) =} if } def
+{
+	(%stdin) (r) file 1 string readstring false eq {(input error) =} if
+} def
 
 
 /str-to-array
@@ -48,7 +74,6 @@
 	4 3 roll put
 	=only
 } def
-
 
 
 /init-array
@@ -78,6 +103,11 @@
 
 
 
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% brainfuck interpretation
 
 
 
@@ -120,14 +150,27 @@
 
 
 
+/read
+% reads input from stdin and stores in current tape cell
+{
+	2swap 2 copy
+	read-stdin {} forall 					% assume only one char here
+	put
+	2swap
+	inc
+} def
+
+
+
 /right
 % TODO: store max cell index. dynamically grow tape??
 % Stack: tape ti code ci -- tape ti+1 code ci+1
 {
-	inc 2swap
-	inc 2swap
+	inc 									% ci + 1
+	2swap
+	inc										% ti + 1
+	2swap
 } def
-
 
 
 
@@ -135,8 +178,24 @@
 % TODO: check underflow, tape index < 0
 % Stack: tape ti code ci -- tape ti-1 code ci+1
 {
-	inc 2swap
-	dec 2swap
+	inc 									% ci + 1
+	2swap
+	dec 									% ti - 1
+	2swap
+} def
+
+
+
+/loop-s
+{
+	(TODO: handle [) =
+} def
+
+
+
+/loop-e
+{
+	(TODO: handle ]) =
 } def
 
 
@@ -144,21 +203,21 @@
 % Dict of brainfuck commands and their corresponding execution tokens
 /bf-commands
 <<
-49 {(hello)=}								% test (1)
+	43 		{ increment }							% +
+	45 		{ decrement }							% -
 
-43 { increment }							% +
-45 { decrement }							% -
+	44 		{ read }								% ,
+	46 		{ print }								% .
 
-44 {(TODO: handle ,)=}						% ,
-46 { print }								% .
+	60 		{ left }								% <
+	62 		{ right }								% >
 
-60 { left }									% <
-62 { right }								% >
+	91 		{ loop-s }								% [
+	93 		{ loop-e }								% ]
 
-91 {(TODO: handle [)=}						% [
-93 {(TODO: handle ])=}						% ]
+	%TODO: # as breakpoint, ! sometimes recognised (??)
 
-/Default {(not implemented)=}
+	/Def 	{(not implemented) =}
 >> def
 
 
@@ -168,6 +227,19 @@
 {
 	//bf-commands exch					% <<commands>> command
 	case
+} def
+
+
+
+/bf-check-end
+% Stack: [tape] ti [code] ci -- [tape] ti [code] ci true/false
+{
+	2 copy
+	exch
+	length
+	eq
+
+	{ true } { false } ifelse
 } def
 
 
@@ -183,6 +255,19 @@
 } def
 
 
+
+/bf-continue
+{
+	{
+		bf-check-end
+		{ exit } if
+
+		bf-step
+	} loop
+} def
+
+
+
 /bf-init-tape
 % Stack: -- [tape]
 {
@@ -191,12 +276,15 @@
 } def
 
 
+
 /bf-read-file
 % Stack: % (filename) -- [code]
 {
 	read-file
+	dup /input-length length def
 	str-to-array
 } def
+
 
 
 /bf-run-file
@@ -216,5 +304,6 @@
 	str-to-array 0				% [code] 0
 	bf-init-tape 0				% [code] 0 [tape] 0
 	2swap						% [tape] 0 [code] 0
-	% ....
+	bf-continue
+	clear
 } def
