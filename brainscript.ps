@@ -259,10 +259,10 @@
 /bf-continue
 {
 	{
+		bf-step
+
 		bf-check-end
 		{ exit } if
-
-		bf-step
 	} loop
 } def
 
@@ -277,20 +277,13 @@
 
 
 
-/bf-read-file
-% Stack: % (filename) -- [code]
-{
-	read-file
-	dup /input-length length def
-	str-to-array
-} def
-
-
-
 /bf-start
+% Stack: [code] 0 --
 {
 	bf-init-tape 0			% [code] 0 [tape] 0
 	2swap					% [tape] 0 [code] 0
+
+%TODO: modes (stepwise/continue/...)
 
 	bf-continue
 } def
@@ -301,18 +294,21 @@
 /bf-run-file
 % Stack (filename) --
 {
-	bf-read-file 0			% [code] 0
-	bf-start
-	clear
-} def
+	read-file
 
+	bf-run
+} def
 
 
 
 /bf-run
 % Stack: (input) --
 {
+	dup length 0 eq {(Empty input!\n)= clear stop} if
+
 	str-to-array 0			% [code] 0
 	bf-start
+
 	clear
+	()=						% newline at end of execution
 } def
