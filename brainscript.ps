@@ -82,29 +82,84 @@
 
 
 
+/increment
+% Stack: tape ti code ci -- tape([ti] + 1) ti code ci+1
+{
+	2swap
+	2 copy 2 copy						% 2 copies for get and put
+	get inc	put							% get value, increment & store back
+	2swap								% swap tape/code back
+	inc									% increment code index
+} def
 
 
 
-% Dict of Brainfuck commands and their corresponding execution tokens
+/decrement
+% Stack: tape ti code ci -- tape([ti] - 1) ti code ci+1
+{
+	2swap
+	2 copy 2 copy
+	get dec put
+	2swap
+	inc
+} def
+
+
+
+/print
+% prints char at current tape cell
+% TODO: store output
+% Stack: tape ti code ci -- tape ti code ci+1
+% Output: current cell as ASCII char
+{
+	2swap
+	2 copy get print-char
+	2swap
+	inc
+} def
+
+
+
+/right
+% TODO: store max cell index. dynamically grow tape??
+% Stack: tape ti code ci -- tape ti+1 code ci+1
+{
+	inc 2swap
+	inc 2swap
+} def
+
+
+
+
+/left
+% TODO: check underflow, tape index < 0
+% Stack: tape ti code ci -- tape ti-1 code ci+1
+{
+	inc 2swap
+	dec 2swap
+} def
+
+
+
+% Dict of brainfuck commands and their corresponding execution tokens
 /bf-commands
 <<
-49 {(hello)=}							% 1
+49 {(hello)=}								% test (1)
 
-43 {(handle +)=}						% +
-45 {(handle -)=}						% -
+43 { increment }							% +
+45 { decrement }							% -
 
-44 {(handle ,)=}						% ,
-46 {(handle .)=}						% .
+44 {(TODO: handle ,)=}						% ,
+46 { print }								% .
 
-60 {(handle <)=}						% <
-62 {(handle >)=}						% >
+60 { left }									% <
+62 { right }								% >
 
-91 {(handle [)=}						% [
-93 {(handle ])=}						% ]
+91 {(TODO: handle [)=}						% [
+93 {(TODO: handle ])=}						% ]
 
 /Default {(not implemented)=}
 >> def
-
 
 
 
@@ -122,11 +177,10 @@
 {
 	2 copy							% [t] ti [c] ci [c] ci
 	get								% .....         command
-	(> ) print dup print-char 		% print current command
-	( : ) print
+	%(> ) print dup print-char 		% print current command
+	%( : ) print
 	bf-handle-command				% interpret current command
 } def
-
 
 
 /bf-init-tape
