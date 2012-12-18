@@ -24,9 +24,8 @@
 %
 % Globals
 
-/max-size 30000 def
+/max-size 1024 def
 /output max-size string def
-
 
 
 
@@ -149,7 +148,6 @@
 } def
 
 
-
 /read
 % reads input from stdin and stores in current tape cell
 {
@@ -163,14 +161,26 @@
 
 
 /right
-% TODO: store max cell index. dynamically grow tape??
 % Stack: tape ti code ci -- tape ti+1 code ci+1
 {
-	inc 									% ci + 1
+	inc										% ci + 1
 	2swap
-	inc										% ti + 1
+	inc-tape								% ti + 1
 	2swap
 } def
+
+
+
+/inc-tape
+% Stack: [tape] ti -- [tape] ti+1
+{
+	inc
+	2 copy exch length ge
+	{ mark 3 -1 roll aload pop 0 ] exch } if 	% grow tape 1 element if index equal length
+} def
+
+
+%2 copy exch length ge {mark 3 -1 roll aload pop 0 ] exch }if
 
 
 
@@ -238,7 +248,6 @@
 	exch
 	length
 	eq
-
 	{ true } { false } ifelse
 } def
 
@@ -268,19 +277,19 @@
 
 
 
-/bf-init-tape
+%/bf-init-tape
 % Stack: -- [tape]
-{
-	max-size array
-	0 init-array
-} def
+%{
+%	1 array
+%	0 init-array
+%} def
 
 
 
 /bf-start
 % Stack: [code] 0 --
 {
-	bf-init-tape 0			% [code] 0 [tape] 0
+	[0] 0					% [code] 0 [tape] 0
 	2swap					% [tape] 0 [code] 0
 
 %TODO: modes (stepwise/continue/...)
@@ -309,6 +318,6 @@
 	str-to-array 0			% [code] 0
 	bf-start
 
-	clear
-	()=						% newline at end of execution
+	%clear
+	%()=						% newline at end of execution
 } def
