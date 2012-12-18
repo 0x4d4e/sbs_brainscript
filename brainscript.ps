@@ -17,6 +17,8 @@
 %	- output/graphics
 %	- modes (stepwise, continue, )
 % 	- breakpoints (#)
+% 	- command handlers return status code true/false to avoid 
+%	  setting index in case of failed loops
 
 
 
@@ -31,7 +33,7 @@
 
 /err-jump { (\nFailed to find matching ']'!) = } def
 /err-loop { (\nFailed to find matching '['!) = } def
-
+/msg-end { (\n\n> Ended) = } def
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -241,8 +243,27 @@
 
 
 /jump-l
+% Stack: code ci -- code cin
 {
-	(TODO: handle ]) = exit
+	/lc 1 def
+
+	dec -1 0 {
+		2 copy get
+		dup 93 eq {
+			/lc lc inc def
+		} if
+		dup 91 eq {
+			/lc lc dec def
+		} if
+		pop
+
+		lc 0 eq
+		{ exit }
+		{ dup 0 ne { pop }if } ifelse
+	} for
+
+	lc 0 ne { err-loop 10000 add }if 				% set index to high value to trigger end check
+													% TODO: error handling
 } def
 
 
@@ -284,12 +305,13 @@
 	2 copy
 	exch
 	length
-	eq
+	ge
 	{ true } { false } ifelse
 } def
 
 
 
+% TODO: add status flag to all commands to abort if invalid input
 /bf-step
 % Stack: [tape] ti [code] ci --[tape] tin [code] cin
 {
@@ -308,7 +330,7 @@
 		bf-step
 
 		bf-check-end
-		{ (\nend of code reached!)= exit } if
+		{ msg-end exit } if
 	} loop
 } def
 
