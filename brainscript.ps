@@ -287,23 +287,32 @@
 
 
 
+/bf-start
+{
+	bf-init-tape 0			% [code] 0 [tape] 0
+	2swap					% [tape] 0 [code] 0
+
+	bf-continue
+} def
+
+
+
+
 /bf-run-file
 % Stack (filename) --
 {
 	bf-read-file 0			% [code] 0
-	bf-init-tape 0			% [code] 0 [tape] 0
-	2swap					% [tape] 0 [code] 0
-	%...
+	bf-start
+	clear
 } def
+
 
 
 
 /bf-run
 % Stack: (input) --
 {
-	str-to-array 0				% [code] 0
-	bf-init-tape 0				% [code] 0 [tape] 0
-	2swap						% [tape] 0 [code] 0
-	bf-continue
+	str-to-array 0			% [code] 0
+	bf-start
 	clear
 } def
