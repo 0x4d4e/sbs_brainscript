@@ -28,7 +28,6 @@
 /output max-size string def
 
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Helpers
@@ -175,12 +174,9 @@
 % Stack: [tape] ti -- [tape] ti+1
 {
 	inc
-	2 copy exch length ge
+	2 copy exch length ge						% ge just to be safe
 	{ mark 3 -1 roll aload pop 0 ] exch } if 	% grow tape 1 element if index equal length
 } def
-
-
-%2 copy exch length ge {mark 3 -1 roll aload pop 0 ] exch }if
 
 
 
@@ -198,14 +194,42 @@
 
 /loop-s
 {
-	(TODO: handle [) =
+	2swap							% get tape
+	2 copy get 0 eq 				% compare current value to 0
+	{ 2swap jump-loop }				% if 0 -> move instruction pointer after ]
+	{ 2swap inc }					% else move ip + 1
+	ifelse
+} def
+
+
+
+/jump-loop
+% Stack: code ci -- code ci-next
+{
+	/lc 1 def
+
+	inc over length dec 1 exch		% run from ci+1 to ] or end
+	{
+		2 copy get
+		dup 91 eq {
+			/lc lc inc def
+		}if
+		dup 93 eq {
+			/lc lc dec def
+		}if
+		pop
+
+		lc 0 eq { exit }{ pop } ifelse
+	} for
+
+	inc
 } def
 
 
 
 /loop-e
 {
-	(TODO: handle ]) =
+	(TODO: handle ]) = exit
 } def
 
 
@@ -213,21 +237,21 @@
 % Dict of brainfuck commands and their corresponding execution tokens
 /bf-commands
 <<
-	43 		{ increment }							% +
-	45 		{ decrement }							% -
+	43 		{ increment }						% +
+	45 		{ decrement }						% -
 
-	44 		{ read }								% ,
-	46 		{ print }								% .
+	44 		{ read }							% ,
+	46 		{ print }							% .
 
-	60 		{ left }								% <
-	62 		{ right }								% >
+	60 		{ left }							% <
+	62 		{ right }							% >
 
-	91 		{ loop-s }								% [
-	93 		{ loop-e }								% ]
+	91 		{ loop-s }							% [
+	93 		{ loop-e }							% ]
 
 	%TODO: # as breakpoint, ! sometimes recognised (??)
 
-	/Def 	{(not implemented) =}
+	/Def 	{(not implemented) = exit}
 >> def
 
 
@@ -271,7 +295,7 @@
 		bf-step
 
 		bf-check-end
-		{ exit } if
+		{ (\nend of code reached!)= exit } if
 	} loop
 } def
 
