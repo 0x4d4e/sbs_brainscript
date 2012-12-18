@@ -6,16 +6,19 @@
 % Matthias Neumayr 	 - 0825199
 %
 
+
 /max-size 30000 def
+/output max-size string def
+
 
 % helpers
 /over   { 1 index 					     } bind def
-/2dup   { 2 copy                         } bind def
 /rot    { 3 -1 roll                      } bind def
 /dec    { 1 sub                          } bind def
 /inc    { 1 add                          } bind def
 /nip    { exch pop                       } bind def
 /flip   { 2 1 roll                       } bind def
+/2swap  { 4 2 roll						 } bind def
 
 
 /read-file
@@ -33,7 +36,7 @@
 % Stack: (str) -- [ chars ]
 {
 	/l over length def
- 	{} forall l array astore
+ 	{} forall l array astore		% expand string on stack and store into array
 } def
 
 
@@ -63,41 +66,101 @@
 } def
 
 
-
-/bf-read-file
-% Stack: % (filename) -- array 0
+/case
+% Stack: dict key -- execute dict value
 {
-	read-file
-	str-to-array
-	0
+	2 copy							% make copy of dict and value
+	known not 						% check if value not in dict
+	{ pop /Default }if				% get default value
+	get exec 						% get and exec dict value otherwise
+} bind def
+
+
+
+
+
+
+
+
+
+
+
+% Dict of Brainfuck commands and their corresponding execution tokens
+/bf-commands
+<<
+49 {(hello)=}							% 1
+
+43 {(handle +)=}						% +
+45 {(handle -)=}						% -
+
+44 {(handle ,)=}						% ,
+46 {(handle .)=}						% .
+
+60 {(handle <)=}						% <
+62 {(handle >)=}						% >
+
+91 {(handle [)=}						% [
+93 {(handle ])=}						% ]
+
+/Default {(not implemented)=}
+>> def
+
+
+
+
+/bf-handle-command
+% Stack: command --
+{
+	//bf-commands exch					% <<commands>> command
+	case
+} def
+
+
+
+/bf-step
+% Stack: [tape] ti [code] ci --[tape] tin [code] cin
+{
+	2 copy							% [t] ti [c] ci [c] ci
+	get								% .....         command
+	(> ) print dup print-char 		% print current command
+	( : ) print
+	bf-handle-command				% interpret current command
 } def
 
 
 
 /bf-init-tape
-% Stack: -- tape 0
+% Stack: -- [tape]
 {
 	max-size array
 	0 init-array
-	0
 } def
 
 
+/bf-read-file
+% Stack: % (filename) -- [code]
+{
+	read-file
+	str-to-array
+} def
 
-/bf-run-file {
-	bf-read-file	% (code) 0
-	bf-init-tape	% (code) 0 [ tape ] 0
+
+/bf-run-file
+% Stack (filename) --
+{
+	bf-read-file 0			% [code] 0
+	bf-init-tape 0			% [code] 0 [tape] 0
+	2swap					% [tape] 0 [code] 0
 	%...
 } def
 
 
 
-
-
-
-% (code) -- 
-/bf-run {
-	str-to-array 0	% (code) 0
-	bf-init-tape	% (code) 0 tape 0
-	%...
+/bf-run
+% Stack: (input) --
+{
+	str-to-array 0				% [code] 0
+	bf-init-tape 0				% [code] 0 [tape] 0
+	2swap						% [tape] 0 [code] 0
+	% ....
 } def
