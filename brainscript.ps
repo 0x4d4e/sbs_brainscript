@@ -28,6 +28,10 @@
 /output max-size string def
 
 
+
+/err-loop { (\nFailed to find matching ']'!) = } def
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Helpers
@@ -192,37 +196,46 @@
 
 
 
-/loop-s
+/jump
 {
 	2swap							% get tape
 	2 copy get 0 eq 				% compare current value to 0
-	{ 2swap jump-loop }				% if 0 -> move instruction pointer after ]
-	{ 2swap inc }					% else move ip + 1
-	ifelse
+	{
+		2swap jump-loop 			% if 0 -> move instruction pointer after ]
+		{ inc }
+		{ err-loop } ifelse
+	}
+	{
+		2swap inc 					% else move ip + 1
+	} ifelse
 } def
 
 
 
 /jump-loop
-% Stack: code ci -- code ci-next
+% Stack: code ci -- code ci-next success
+% TODO: add boolean return value for success status
 {
-	/lc 1 def
+	/lc 1 def 						% loopcount
 
 	inc over length dec 1 exch		% run from ci+1 to ] or end
 	{
-		2 copy get
+		2 copy get					% get command at index
 		dup 91 eq {
-			/lc lc inc def
+			/lc lc inc def 			% increment lc for every [ found
 		}if
 		dup 93 eq {
-			/lc lc dec def
+			/lc lc dec def 			% decrement lc for every ] found
 		}if
-		pop
+		pop 						% remove current code value
 
-		lc 0 eq { exit }{ pop } ifelse
+		lc 0 eq 					% check loopcount
+		{ exit }					% exit and leave loop index on stack
+		{ pop } 					% remove loop index if matching ] not found
+		ifelse
 	} for
 
-	inc
+	lc 0 eq dup false eq {exch dup length 3 -1 roll} if
 } def
 
 
@@ -246,8 +259,8 @@
 	60 		{ left }							% <
 	62 		{ right }							% >
 
-	91 		{ loop-s }							% [
-	93 		{ loop-e }							% ]
+	91 		{ jump }							% [
+	93 		{ loop }							% ]
 
 	%TODO: # as breakpoint, ! sometimes recognised (??)
 
