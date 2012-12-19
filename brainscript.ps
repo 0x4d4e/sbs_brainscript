@@ -223,8 +223,8 @@
 	}
 	{                               % else move ip + 1
         2swap 2 copy jump-end       % check for syntax error even if no jump occurs!
-        { drop drop inc } 			% syntax correct, inc ip
-        { err-jump }
+        { pop pop inc } 			% syntax correct, inc ip
+        { err-jump } ifelse
 	} ifelse
 } def
 

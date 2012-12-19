@@ -1,0 +1,106 @@
+\documentclass{beamer}
+
+\usepackage[utf8x]{inputenc}
+
+\usetheme{default}
+
+\title[Brainscript]{Brainscript}
+\subtitle{A Postscript interpreter and visualizer for Brainfuck programs}
+\author{Fabian Grünbichler, Matthias Neumayr}
+
+
+\begin{document}
+
+\frame{
+    \titlepage
+}
+
+
+\begin{frame}{Brainfuck?}
+
+    \begin{itemize}
+        \item Esoterische Programmiersprache
+        \item \emph{Turing Tarpit}
+        \item Datenspeicher + Pointer auf aktuelle Speicherzelle
+        \item Programmspeicher + Pointer auf aktuelle Instruktion
+    \end{itemize}
+
+\end{frame}
+
+\begin{frame}{8 Befehle}
+
+    \begin{center}
+        Daten- und Instruktionspointer zu Beginn $0$, Datenspeicher leer\\ 
+        \begin{table}
+            \begin{tabular}[h!]{c|l}
+                $>$ & Daten-Pointer eine Position nach rechts verschieben (d++) \\ 
+                $<$ & Daten-Pointer eine Position nach links verschieben (d--) \\
+                $+$ & Inhalt der aktuellen Speicherzelle um 1 erhöhen (*d++) \\
+                $-$ & Inhalt der aktuellen Speicherzelle um 1 verringern (*d--) \\
+                . & Inhalt der aktuellen Speicherzelle als ASCII-Zeichen ausgeben \\
+                , & 1 Byte Input einlesen und in aktuelle Speicherzelle speichern \\
+                $[$ & Schleifenbeginn, Bedingung aktuelles Datenelement  $= 0$ \\
+                $]$ & Schleifenende, Sprung zu Beginn wenn aktuelles Datenelement $\neq 0$ \\
+            \end{tabular}
+        \end{table}
+    \end{center}
+
+\end{frame}
+
+\begin{frame}[fragile,c]{Beispielcode}
+
+    \emph{Matthias} ausgeben:
+
+    \begin{verbatim}
+++++++++++++++++++++++++++++++++++++++++++++++++++++
++++++++++++++++++++++++++.++++++++++++++++++++.+++++
+++++++++++++++..------------.+.--------.++++++++++++
+++++++.
+    \end{verbatim}
+
+\end{frame}
+
+\begin{frame}[fragile,c]{Beispielcode ctd}
+
+    Fibonacci-Zahlen bis $100$ berechnen:
+
+    \begin{verbatim}
++++++++++++>+>>>>+++++++++++++++++++++++++++++++++++
++++++++++>++++++++++++++++++++++++++++++++<<<<<<[>[>
+>>>>>+>+<<<<<<<-]>>>>>>>[<<<<<<<+>>>>>>>-]<[>+++++++
++++[-<-[>>+>+<<<-]>>>[<<<+>>>-]+<[>[-]<[-]]>[<<[>>>+
+<<<-]>>[-]]<<]>>>[>>+>+<<<-]>>>[<<<+>>>-]+<[>[-]<[-]
+]>[<<+>>[-]]<<<<<<<]>>>>>[++++++++++++++++++++++++++
+++++++++++++++++++++++.[-]]++++++++++<[->-<]>+++++++
++++++++++++++++++++++++++++++++++++++++++.[-]<<<<<<<
+<<<<<[>>>+>+<<<<-]>>>>[<<<<+>>>>-]<-[>>.>.<<<[-]]<<[
+>>+>+<<<-]>>>[<<<+>>>-]<<[<+>-]>[<+>-]<<<-]
+    \end{verbatim}
+
+\end{frame}
+
+\begin{frame}{Aktueller Stand}
+
+    \begin{itemize}
+        \item Interpreter
+        \item Programm aus Datei oder als String vom Stack lesen
+        \item Instruktionsweises Ausführen des Programms
+        \item Input von stdin lesen (immer nur 1 Char)
+        \item Output ausgeben (stdout und Array)
+    \end{itemize}
+
+\end{frame}
+
+\begin{frame}{TODO - Visualisierung, Wrapper}
+
+    \begin{itemize}
+        \item PS-Output: Instruktionsspeicher + aktuelle Position
+        \item PS-Output: Datenspeicher + aktuelle Position
+        \item PS-Output: bisheriger Output
+        \item Wrapper (bash,C?) für komfortable, interaktive Kontrolle
+        \item (mehr) Fehlerbehandlung
+    \end{itemize}
+
+\end{frame}
+
+\end{document}
