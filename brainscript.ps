@@ -209,8 +209,10 @@
 		{ inc }						% position of matching ] returned, increment ci
 		{ err-jump } ifelse			% no matching ] found, ci should be at end
 	}
-	{
-		2swap inc 					% else move ip + 1
+	{                               % else move ip + 1
+        2swap 2 copy jump-end       % check for syntax error even if no jump occurs!
+        { drop drop inc } 			% syntax correct, inc ip
+        { err-jump }
 	} ifelse
 } def
 
