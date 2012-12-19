@@ -287,7 +287,7 @@
 
 	%TODO: # as breakpoint, ! sometimes recognised (??)
 
-	/Def 	{(not implemented) = exit}
+	/Default 	{ inc }
 >> def
 
 
@@ -314,6 +314,7 @@
 
 
 % TODO: add status flag to all commands to abort if invalid input
+% ?? brainfuck should (and now does) ignore non-commands, arrays throw rangecheck error for out-of-bounds access
 /bf-step
 % Stack: [tape] ti [code] ci --[tape] tin [code] cin
 {
@@ -324,7 +325,18 @@
 	bf-handle-command				% interpret current command
 } def
 
+% tape ti code ci steps
+/bf-continue-n
+{
+    0 1 rot
+    {
+        pop
+        bf-step
+        bf-check-end
+        { msg-end exit } if
+    } for
 
+} def
 
 /bf-continue
 {
@@ -355,7 +367,7 @@
 
 %TODO: modes (stepwise/continue/...)
 
-	bf-continue
+%	bf-continue
 } def
 
 
