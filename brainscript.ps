@@ -27,7 +27,7 @@
 % Globals
 
 /max-size 1024 def
-/output max-size string def
+/output [ 0 max-size string] def
 
 
 
@@ -80,6 +80,17 @@
 	=only
 } def
 
+/put-output
+% char-as-int --
+% modifies output
+% TODO: make output larger if needed
+{
+    output dup 1 get            % get array, int output array
+    exch 0 get                  % get index, int array index
+    rot put                     % store
+    output dup 0 get            % output index
+    inc 0 exch put              % index + 1 back to output
+} def
 
 /init-array
 % Stack: array init_value -- initialized_array
@@ -143,12 +154,13 @@
 
 /print
 % prints char at current tape cell
-% TODO: store output
 % Stack: tape ti code ci -- tape ti code ci+1
 % Output: current cell as ASCII char
 {
 	2swap
-	2 copy get print-char
+	2 copy get          % char as int on top of stack
+    dup put-output
+    print-char
 	2swap
 	inc
 } def
