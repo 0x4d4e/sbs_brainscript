@@ -33,32 +33,44 @@
         Daten- und Instruktionspointer zu Beginn $0$, Datenspeicher leer\\ 
         \begin{table}
             \begin{tabular}[h!]{c|l}
-                $>$ & Daten-Pointer eine Position nach rechts verschieben (d++) \\ 
-                $<$ & Daten-Pointer eine Position nach links verschieben (d--) \\
-                $+$ & Inhalt der aktuellen Speicherzelle um 1 erhöhen (*d++) \\
-                $-$ & Inhalt der aktuellen Speicherzelle um 1 verringern (*d--) \\
+                $>$ & Daten-Pointer eine Position nach rechts ($d++$) \\ 
+                $<$ & Daten-Pointer eine Position nach links ($d--$) \\
+                $+$ & Wert in aktueller Speicherzelle um 1 erhöhen ($*d++$) \\
+                $-$ & Wert in aktueller Speicherzelle um 1 verringern ($*d--$) \\
                 . & Inhalt der aktuellen Speicherzelle als ASCII-Zeichen ausgeben \\
                 , & 1 Byte Input einlesen und in aktuelle Speicherzelle speichern \\
-                $[$ & Schleifenbeginn, Bedingung aktuelles Datenelement  $= 0$ \\
-                $]$ & Schleifenende, Sprung zu Beginn wenn aktuelles Datenelement $\neq 0$ \\
+                $[$ & Schleifenbeginn, while  $d \neq 0$ \\
+                $]$ & Schleifenende, unbedingter Sprung zu Beginn \\
             \end{tabular}
         \end{table}
     \end{center}
 
 \end{frame}
 
+
 \begin{frame}[fragile,c]{Beispielcode}
 
-    \emph{Matthias} ausgeben:
+    \emph{Hallo World!} ausgeben:
 
     \begin{verbatim}
-++++++++++++++++++++++++++++++++++++++++++++++++++++
-+++++++++++++++++++++++++.++++++++++++++++++++.+++++
-++++++++++++++..------------.+.--------.++++++++++++
-++++++.
++++++ +++++             initialize counter (cell #0) to 10
+[   > +++++ ++              add  7 to cell #1
+    > +++++ +++++           add 10 to cell #2 
+    > +++                   add  3 to cell #3
+    > +                     add  1 to cell #4
+    <<<< -  ]           decrement counter (cell #0)           
+> ++ . > + .            'He'            
++++++ ++ . .            'll'
++++ . > ++ .            'o '
+<< +++++ +++++ +++++ .  'W'
+> . +++ .               'or'
+----- - .               'l'
+----- --- .             'd'
+> + . > .               '!\n'
     \end{verbatim}
 
 \end{frame}
+
 
 \begin{frame}[fragile,c]{Beispielcode ctd}
 
