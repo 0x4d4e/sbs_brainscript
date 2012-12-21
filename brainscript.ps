@@ -48,11 +48,13 @@
 /2swap  { 4 2 roll						 } bind def
 
 
+
 /read-file
 % Stack: (filename) --(content)
 { 
 	(r) file max-size string readstring {(input too long) =} if
 } def
+
 
 
 /read-stdin
@@ -63,12 +65,14 @@
 } def
 
 
+
 /str-to-array
 % Stack: (str) -- [ chars ]
 {
 	/l over length def
  	{} forall l array astore		% expand string on stack and store into array
 } def
+
 
 
 /print-char
@@ -79,6 +83,8 @@
 	4 3 roll put
 	=only
 } def
+
+
 
 /put-output
 % char-as-int --
@@ -92,19 +98,6 @@
     inc 0 exch put              % index + 1 back to output
 } def
 
-/init-array
-% Stack: array init_value -- initialized_array
-{
-	exch dup 						% v a a
-	3 1 roll 						% a v a
-	dup 0 1 3 2 roll length 1 sub 	% a v a 0 1 l-1
-	{ 								% a v a i
-		2 copy 						% a v a i a i
-		4 index 					% a v a i a i v
-		put pop 					% a v a
-	} for
-	pop pop 						% a
-} def
 
 
 /case
@@ -124,7 +117,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % brainfuck interpretation
-
 
 
 
@@ -164,6 +156,7 @@
 	2swap
 	inc
 } def
+
 
 
 /read
@@ -337,6 +330,8 @@
 	bf-handle-command				% interpret current command
 } def
 
+
+
 % tape ti code ci steps
 /bf-continue-n
 {
@@ -350,6 +345,8 @@
 
 } def
 
+
+
 /bf-continue
 {
 	{
@@ -359,15 +356,6 @@
 		{ msg-end exit } if
 	} loop
 } def
-
-
-
-%/bf-init-tape
-% Stack: -- [tape]
-%{
-%	1 array
-%	0 init-array
-%} def
 
 
 
@@ -381,7 +369,6 @@
 
 %	bf-continue
 } def
-
 
 
 
