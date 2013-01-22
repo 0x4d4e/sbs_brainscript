@@ -28,7 +28,9 @@
 
 /max-size 50000 def
 /output [ 0 max-size string] def
+/pauselength 5000000 def
 
+/Helvetica findfont 10 scalefont setfont
 
 
 /err-jump 	{ (\nFailed to find matching ']'!) } def
@@ -47,6 +49,19 @@
 /nip    { exch pop                       } bind def
 /flip   { 2 1 roll                       } bind def
 /2swap  { 4 2 roll						 } bind def
+
+
+
+
+/pause
+{
+  pauselength dup 0 1 3 2 roll
+  {
+  	pop
+  	1 2 add pop
+  } for
+  pop
+} def
 
 
 
@@ -76,6 +91,8 @@
 
 
 
+
+
 /print-char
 % Stack: int --
 % Output: char
@@ -83,6 +100,12 @@
 	( ) dup 0
 	4 3 roll put
 	=only
+} def
+
+
+/int-to-str
+{
+	20 string cvs
 } def
 
 
@@ -124,8 +147,64 @@
 % main redraw
 % Stack tape ti code ci -- tape ti code ci
 {
-	
+	%erasepage
+	%draw-code
+	draw-tape
+
+
+
 } def
+
+
+
+/draw-code
+{
+	2 copy
+} def
+
+
+
+
+
+
+
+/draw-tape
+{
+	2swap
+	flip dup
+	length 0 1 rot dec {
+		2 copy
+		get flip						% v i
+		75 mul 20 add 500 				% x = 20 + (i * 75), y = 500
+		3 2 roll draw-tape-cell			% x y v + draw
+	} for
+	flip
+	2swap
+} def
+
+
+
+/draw-tape-cell
+% Stack: x y v --
+{
+	3 1 roll 2 copy
+	newpath
+	moveto
+	0 20 rlineto
+	75 0 rlineto
+	0 -20 rlineto
+	closepath
+	stroke
+
+	%TODO: format output
+	5 add flip 5 add flip
+	moveto
+	int-to-str
+	show
+} def
+
+
+
 
 
 
@@ -357,7 +436,8 @@
 	bf-handle-command				% interpret current command
 
 	{
-		%%redraw
+		redraw
+		pause
 		bf-check-end
 		{ msg-end = false }{ true }ifelse
 	}
@@ -373,6 +453,7 @@
 } def
 
 
+
 % tape ti code ci steps
 /bf-continue-n
 {
@@ -382,7 +463,6 @@
         bf-next
         not { exit }if
     } for
-
 } def
 
 
@@ -397,11 +477,24 @@
 
 
 
+/bf-cwp
+{
+	{
+		bf-next
+		redraw
+        not { exit }if
+	} loop
+} def
+
+
+
 /bf-init
 % Stack: [code] 0 --
 {
 	[0] 0					% [code] 0 [tape] 0
 	2swap					% [tape] 0 [code] 0
+
+
 } def
 
 
