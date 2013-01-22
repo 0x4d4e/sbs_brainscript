@@ -373,37 +373,38 @@
 
 
 
-/bf-start
+/bf-init
 % Stack: [code] 0 --
 {
 	[0] 0					% [code] 0 [tape] 0
 	2swap					% [tape] 0 [code] 0
-
-%TODO: modes (stepwise/continue/...)
-
-%	bf-continue
 } def
 
 
 
-/bf-run-file
+/bf-load-file
 % Stack (filename) --
 {
 	read-file
 
-	bf-run
+	bf-load
 } def
 
 
 
-/bf-run
+/bf-load
 % Stack: (input) --
 {
 	dup length 0 eq {(Empty input!\n)= clear stop} if
 
 	str-to-array 0			% [code] 0
-	bf-start
-
-	%clear
-	%()=						% newline at end of execution
+	bf-init
 } def
+
+
+
+/bf-exit
+{
+	clear
+	()=						% newline at end of execution
+}
