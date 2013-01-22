@@ -50,7 +50,58 @@
 /flip   { 2 1 roll                       } bind def
 /2swap  { 4 2 roll						 } bind def
 
+/digitToHex {
+	dup 10 lt 
+		{48 add} 
+		{10 mod 65 add} 
+	ifelse
+} def
+ 
+/hexHelper {[ 70 69 68 67 66 65 57 56 55 54 53 52 51 50 49 48 ]} def
 
+/hexNegate {
+	dup 1 1 8
+	{ 
+		2 copy get 		% string string i char
+		48 sub 
+		dup 10 gt { 7 sub } if
+		hexHelper 2 1 roll get put dup
+	}
+	for
+	pop
+} def
+
+% int - string (8stellig!, sh. Appendix B PS-Doku)
+/intToHex {
+	dup 0 lt
+		{ 1 add -1 mul true}
+		{ false } 
+	ifelse
+	2 1 roll
+	16
+	7 -1 0
+	{ % int i
+		exp cvi 2 copy			% int 16^i int 16^i
+		idiv 				% int 16^i digit
+		dup
+		digitToHex		 	% int 16^i digit char
+		4 1 roll			% char int 16^i digit
+		mul sub 16
+
+	} for	
+	pop pop
+	(#00000000) dup
+	8 -1 1
+	{
+		4 -1 roll
+		put
+		dup
+	} for
+	pop
+	2 1 roll {
+		hexNegate
+	} if
+} def
 
 
 /pause
