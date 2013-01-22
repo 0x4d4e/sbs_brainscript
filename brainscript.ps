@@ -31,9 +31,10 @@
 
 
 
-/err-jump { (\nFailed to find matching ']'!) = } def
-/err-loop { (\nFailed to find matching '['!) = } def
-/msg-end { (\n\n> Ended) = } def
+/err-jump 	{ (\nFailed to find matching ']'!) } def
+/err-loop 	{ (\nFailed to find matching '['!) } def
+/err-under 	{ (\nLeft shift index < 0!) } def
+/msg-end 	{ (\n\n> Ended) } def
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -121,32 +122,34 @@
 
 
 /increment
-% Stack: tape ti code ci -- tape([ti] + 1) ti code ci+1
+% Stack: tape ti code ci -- tape([ti] + 1) ti code ci+1 true
 {
 	2swap
 	2 copy 2 copy						% 2 copies for get and put
 	get inc	put							% get value, increment & store back
 	2swap								% swap tape/code back
 	inc									% increment code index
+	true
 } def
 
 
 
 /decrement
-% Stack: tape ti code ci -- tape([ti] - 1) ti code ci+1
+% Stack: tape ti code ci -- tape([ti] - 1) ti code ci+1 true
 {
 	2swap
 	2 copy 2 copy
 	get dec put
 	2swap
 	inc
+	true
 } def
 
 
 
 /print
 % prints char at current tape cell
-% Stack: tape ti code ci -- tape ti code ci+1
+% Stack: tape ti code ci -- tape ti code ci+1 true
 % Output: current cell as ASCII char
 {
 	2swap
@@ -155,6 +158,7 @@
     print-char
 	2swap
 	inc
+	true
 } def
 
 
@@ -167,23 +171,25 @@
 	put
 	2swap
 	inc
+	true
 } def
 
 
 
 /right
-% Stack: tape ti code ci -- tape ti+1 code ci+1
+% Stack: tape ti code ci -- tape ti+1 code ci+1 true
 {
 	inc										% ci + 1
 	2swap
 	inc-tape								% ti + 1
 	2swap
+	true
 } def
 
 
 
 /inc-tape
-% Stack: [tape] ti -- [tape] ti+1
+% Stack: [tape] ti -- [tape] ti+1 true
 {
 	inc
 	2 copy exch length ge						% ge just to be safe
@@ -194,30 +200,38 @@
 
 /left
 % TODO: check underflow, tape index < 0
-% Stack: tape ti code ci -- tape ti-1 code ci+1
+% Stack: tape ti code ci -- tape ti-1 code ci+1 {true | err-msg false}
 {
 	inc 									% ci + 1
 	2swap
 	dec 									% ti - 1
-	2swap
+	dup 0 ge
+	{
+		2swap
+		true
+	}{
+		2swap
+		err-under
+		false
+	} ifelse
 } def
 
 
 
 /jump-r
-% Stack tape ti code ci -- tape ti code cin
+% Stack tape ti code ci -- tape ti code cin {true | error-msg false}
 {
 	2swap							% get tape
 	2 copy get 0 eq 				% compare current value to 0
 	{
 		2swap jump-end				% if 0 -> move instruction pointer after ]
-		{ inc }						% position of matching ] returned, increment ci
-		{ err-jump } ifelse			% no matching ] found, ci should be at end
+		{ inc true }				% position of matching ] returned, increment ci
+		{ err-jump false } ifelse	% no matching ] found, ci should be at end
 	}
 	{                               % else move ip + 1
         2swap 2 copy jump-end       % check for syntax error even if no jump occurs!
-        { pop pop inc } 			% syntax correct, inc ip
-        { err-jump } ifelse
+        { pop pop inc true } 		% syntax correct, inc ip
+        { err-jump false} ifelse
 	} ifelse
 } def
 
@@ -250,7 +264,7 @@
 
 
 /jump-l
-% Stack: code ci -- code cin
+% Stack: code ci -- code cin {true | error-msg false}
 {
 	/lc 1 def
 
@@ -269,8 +283,7 @@
 		{ dup 0 ne { pop }if } ifelse
 	} for
 
-	lc 0 ne { err-loop 10000 add }if 				% set index to high value to trigger end check
-													% TODO: error handling
+	lc 0 ne { err-loop false }{ true }ifelse		% check count and set result flag
 } def
 
 
@@ -321,12 +334,12 @@
 % TODO: add status flag to all commands to abort if invalid input
 % ?? brainfuck should (and now does) ignore non-commands, arrays throw rangecheck error for out-of-bounds access
 /bf-step
-% Stack: [tape] ti [code] ci --[tape] tin [code] cin
+% Stack: [tape] ti [code] ci --[tape] tin [code] cin {true | err-msg false}
 {
 	2 copy							% [t] ti [c] ci [c] ci
 	get								% .....         command
-	%(> ) print dup print-char 		% print current command
-	%( : ) print
+	%(> ) = dup print-char 			% print current command
+	%( : ) =
 	bf-handle-command				% interpret current command
 } def
 
@@ -339,8 +352,9 @@
     {
         pop
         bf-step
+        true ne { = exit }if
         bf-check-end
-        { msg-end exit } if
+        { msg-end = exit } if
     } for
 
 } def
@@ -351,9 +365,9 @@
 {
 	{
 		bf-step
-
+		true ne { = exit }if
 		bf-check-end
-		{ msg-end exit } if
+		{ msg-end = exit } if
 	} loop
 } def
 
