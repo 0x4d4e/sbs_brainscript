@@ -26,7 +26,7 @@
 %
 % Globals
 
-/max-size 1024 def
+/max-size 50000 def
 /output [ 0 max-size string] def
 
 
@@ -70,7 +70,7 @@
 % Stack: (str) -- [ chars ]
 {
 	/l over length def
- 	{} forall l array astore		% expand string on stack and store into array
+ 	{ 0 add } forall l array astore		% expand string on stack and store into array
 } def
 
 
