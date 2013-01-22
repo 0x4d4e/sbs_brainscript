@@ -52,7 +52,7 @@
 
 /read-file
 % Stack: (filename) --(content)
-{ 
+{
 	(r) file max-size string readstring {(input too long) =} if
 } def
 
@@ -114,6 +114,22 @@
 
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% drawing
+
+
+
+/redraw
+% main redraw
+% Stack tape ti code ci -- tape ti code ci
+{
+	
+} def
+
+
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -167,7 +183,7 @@
 % reads input from stdin and stores in current tape cell
 {
 	2swap 2 copy
-	read-stdin {} forall 					% assume only one char here
+	read-stdin {0 add} forall 					% assume only one char here
 	put
 	2swap
 	inc
@@ -199,7 +215,6 @@
 
 
 /left
-% TODO: check underflow, tape index < 0
 % Stack: tape ti code ci -- tape ti-1 code ci+1 {true | err-msg false}
 {
 	inc 									% ci + 1
@@ -320,7 +335,7 @@
 
 
 /bf-check-end
-% Stack: [tape] ti [code] ci -- [tape] ti [code] ci true/false
+% Stack: [tape] ti [code] ci -- [tape] ti [code] ci true|false
 {
 	2 copy
 	exch
@@ -330,19 +345,32 @@
 } def
 
 
-
 % TODO: add status flag to all commands to abort if invalid input
 % ?? brainfuck should (and now does) ignore non-commands, arrays throw rangecheck error for out-of-bounds access
-/bf-step
-% Stack: [tape] ti [code] ci --[tape] tin [code] cin {true | err-msg false}
+/bf-next
+% Stack: [tape] ti [code] ci --[tape] tin [code] cin {true|false}
 {
 	2 copy							% [t] ti [c] ci [c] ci
 	get								% .....         command
 	%(> ) = dup print-char 			% print current command
 	%( : ) =
 	bf-handle-command				% interpret current command
+
+	{
+		%%redraw
+		bf-check-end
+		{ msg-end = false }{ true }ifelse
+	}
+	{ = false }ifelse
 } def
 
+
+
+/bf-step
+{
+	bf-next
+	pop
+} def
 
 
 % tape ti code ci steps
@@ -351,10 +379,8 @@
     0 1 rot
     {
         pop
-        bf-step
-        true ne { = exit }if
-        bf-check-end
-        { msg-end = exit } if
+        bf-next
+        not { exit }if
     } for
 
 } def
@@ -364,10 +390,8 @@
 /bf-continue
 {
 	{
-		bf-step
-		true ne { = exit }if
-		bf-check-end
-		{ msg-end = exit } if
+		bf-next
+        not { exit }if
 	} loop
 } def
 
