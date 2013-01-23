@@ -175,14 +175,7 @@
 
 
 
-/case
-% Stack: dict key -- execute dict value
-{
-	2 copy							% make copy of dict and value
-	known not 						% check if value not in dict
-	{ pop /Default }if				% get default value
-	get exec 						% get and exec dict value otherwise
-} bind def
+
 
 
 
@@ -474,10 +467,20 @@
 	91 		{ jump-r }							% [
 	93 		{ jump-l }							% ]
 
-	%TODO: # as breakpoint, ! sometimes recognised (??)
+	%TODO: # as breakpoint
 
 	/Default 	{ inc true }
 >> def
+
+
+/case
+% Stack: dict key -- execute dict value
+{
+	2 copy							% make copy of dict and value
+	known not 						% check if value not in dict
+	{ pop /Default }if				% get default value
+	get exec 						% get and exec dict value otherwise
+} bind def
 
 
 
