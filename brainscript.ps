@@ -17,8 +17,6 @@
 %	- output/graphics
 %	- modes (stepwise, continue, )
 % 	- breakpoints (#)
-% 	- command handlers return status code true/false to avoid 
-%	  setting index in case of failed loops
 
 
 
@@ -29,8 +27,10 @@
 /max-size 50000 def
 /output [ 0 max-size string] def
 /pauselength 5000000 def
-/cellcount 7 def
-/cellwidth 75 def
+/tape_cellcount 7 def
+/tape_cellwidth 75 def
+/code_cellcount 21 def
+/code_cellwidth 25 def
 /cellheight 20 def
 
 /Courier findfont 10 scalefont setfont
@@ -213,7 +213,7 @@
     newpath
     moveto
     0 cellheight 2 sub rlineto
-    cellwidth 2 sub 0 rlineto
+    tape_cellwidth 2 sub 0 rlineto
     0 cellheight 2 sub neg rlineto
     closepath
     1 setgray
@@ -227,7 +227,7 @@
 {
 	2swap
 	2 copy dup                          % tape tin tin
-    cellcount 2 idiv sub dup            % tape tin cellstart cellstart
+    tape_cellcount 2 idiv sub dup            % tape tin cellstart cellstart
     0 lt                                % tape tin cellstart
         {                               % tin zu weit links, leere zellen davor
             -1 mul                      % +cellstart
@@ -242,9 +242,9 @@
     ifelse                              % tape tin padding [ strings ]
     [
     5 2 roll dup                        % [ s ] [ tape tin padding padding
-    cellcount 2 idiv flip sub           % tape tin padding toleft
+    tape_cellcount 2 idiv flip sub           % tape tin padding toleft
     3 -1 roll flip sub                       % tape padding leftindex
-    dup cellcount dec 4 -1 roll sub add % tape lindex rindex
+    dup tape_cellcount dec 4 -1 roll sub add % tape lindex rindex
     2 index length dec min              % tape lindex min(rindex/length--)
     1 flip
     {                                   % tape i
@@ -255,15 +255,15 @@
     
     % tape tin [ ] [ ]
     concat-array
-    0 1 cellcount
+    0 1 tape_cellcount
     {
-        cellwidth mul 21 add 501 erase-tape-cell
+        tape_cellwidth mul 21 add 501 erase-tape-cell
     } for
     dup length dec 0 1 3 -1 roll        % for 0, < length, ++
     { %strings i
         2 copy
         get flip                       % strings string i
-        cellwidth mul 21 add 501      % strings string x y
+        tape_cellwidth mul 21 add 501      % strings string x y
         3 2 roll draw-tape-cell
     } for
     pop
@@ -274,25 +274,25 @@
 % x y
 {
     
-	0 1 cellcount dec {
+	0 1 tape_cellcount dec {
 		
-		cellwidth mul cellheight add 500 				% x = 20 + (i * 75), y = 500
+		tape_cellwidth mul cellheight add 500 				% x = 20 + (i * 75), y = 500
 		newpath
     	moveto
     	0 cellheight rlineto
-	    cellwidth 0 rlineto
+	    tape_cellwidth 0 rlineto
     	0 cellheight neg rlineto
 	    closepath
     	stroke
 	} for
 	gsave
-	2 setlinewidth 1 0 0 setrgbcolor
-	cellcount 2 idiv
-	cellwidth mul cellheight add 500 				% x = 20 + (i * 75), y = 500
+	2 setlinewidth 1 0 0 setrgbcolor					% draw red border
+	tape_cellcount 2 idiv
+	tape_cellwidth mul cellheight add 500 					% x = 20 + (i * 75), y = 500
 	newpath
 	moveto
 	0 cellheight rlineto
-    cellwidth 0 rlineto
+    tape_cellwidth 0 rlineto
 	0 cellheight neg rlineto
     closepath
 	stroke
