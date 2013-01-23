@@ -30,7 +30,8 @@
 /output [ 0 max-size string] def
 /pauselength 5000000 def
 /cellcount 7 def
-/celllength 75 def
+/cellwidth 75 def
+/cellheight 20 def
 
 /Courier findfont 10 scalefont setfont
 
@@ -177,6 +178,11 @@
 } def
 
 
+/concat-array
+%Stack: [] [] -- []
+{
+    exch [ 3 1 roll aload pop counttomark -1 roll aload pop ]
+} def
 
 
 
@@ -194,20 +200,11 @@
 % main redraw
 % Stack tape ti code ci -- tape ti code ci
 {
-	%erasepage
 	%draw-code
     %erase-tape
 	draw-tape
     %draw-tape2
-
-
 } def
-
-/draw-code
-{
-	2 copy
-} def
-
 
 
 
@@ -215,19 +212,16 @@
 {
     newpath
     moveto
-    0 19 rlineto
-    74 0 rlineto
-    0 -19 rlineto
+    0 cellheight 2 sub rlineto
+    cellwidth 2 sub 0 rlineto
+    0 cellheight 2 sub neg rlineto
     closepath
     1 setgray
     fill
     0 setgray
 } def
 
-/concat
-{
-    exch [ 3 1 roll aload pop counttomark -1 roll aload pop ]
-} def
+
 
 /draw-tape
 {
@@ -260,16 +254,16 @@
     pop ]
     
     % tape tin [ ] [ ]
-    concat
+    concat-array
     0 1 cellcount
     {
-        celllength mul 21 add 501 erase-tape-cell
+        cellwidth mul 21 add 501 erase-tape-cell
     } for
     dup length dec 0 1 3 -1 roll        % for 0, < length, ++
     { %strings i
         2 copy
         get flip                       % strings string i
-        celllength mul 21 add 501      % strings string x y
+        cellwidth mul 21 add 501      % strings string x y
         3 2 roll draw-tape-cell
     } for
     pop
@@ -281,17 +275,30 @@
 {
     
 	0 1 cellcount dec {
-		celllength mul 20 add 500 				% x = 20 + (i * 75), y = 500
+		
+		cellwidth mul cellheight add 500 				% x = 20 + (i * 75), y = 500
 		newpath
     	moveto
-    	0 20 rlineto
-	    celllength 0 rlineto
-    	0 -20 rlineto
+    	0 cellheight rlineto
+	    cellwidth 0 rlineto
+    	0 cellheight neg rlineto
 	    closepath
     	stroke
 	} for
-
+	gsave
+	2 setlinewidth 1 0 0 setrgbcolor
+	cellcount 2 idiv
+	cellwidth mul cellheight add 500 				% x = 20 + (i * 75), y = 500
+	newpath
+	moveto
+	0 cellheight rlineto
+    cellwidth 0 rlineto
+	0 cellheight neg rlineto
+    closepath
+	stroke
+	grestore
 } def
+
 
 /draw-tape-cell
 % Stack: x y v --
