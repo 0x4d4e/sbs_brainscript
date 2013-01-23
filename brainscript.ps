@@ -563,7 +563,7 @@
 
 
 /bf-init
-% Stack: [code] 0 -- 0 [code] 0 [tape] 0
+% Stack: [code] 0 -- 0 [t] 0 [c] 0
 {
 	0 3 1 roll
 	[0] 0					% [code] 0 [tape] 0
@@ -573,7 +573,7 @@
 
 
 /bf-load-file
-% Stack (filename) -- 
+% Stack (filename) --
 {
 	read-file
 	bf-load
@@ -581,7 +581,7 @@
 
 
 /bf-load
-% Stack: (input) --
+% Stack: (input) -- 0 [t] 0 [c] 0
 {
 	dup length 0 eq {(Empty input!\n)= clear stop} if
 
@@ -593,6 +593,7 @@
 
 
 /bf-run-file
+Stack: (filename) --
 {
 	bf-load-file
 	bf-continue
@@ -602,6 +603,7 @@
 
 
 /bf-run
+%Stack: (bf-code) --
 {
 	bf-load
 	bf-continue
