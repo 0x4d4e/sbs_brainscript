@@ -29,7 +29,7 @@
 /max-size 50000 def
 /output [ 0 max-size string] def
 /pauselength 5000000 def
-/cellcount 9 def
+/cellcount 7 def
 /celllength 75 def
 
 /Courier findfont 10 scalefont setfont
@@ -159,7 +159,7 @@
 
 /int-to-str
 {
-	20 string cvs
+	5 string cvs
 } def
 
 
@@ -280,12 +280,12 @@
 % x y
 {
     
-	0 1 8 {
-		75 mul 20 add 500 				% x = 20 + (i * 75), y = 500
+	0 1 cellcount dec {
+		celllength mul 20 add 500 				% x = 20 + (i * 75), y = 500
 		newpath
     	moveto
     	0 20 rlineto
-	    75 0 rlineto
+	    celllength 0 rlineto
     	0 -20 rlineto
 	    closepath
     	stroke
@@ -649,6 +649,6 @@
 
 /bf-exit
 {
-	clear
-	()=
+	pop pop pop pop
+	=only ( Instructions)=
 } def
