@@ -554,7 +554,7 @@
 	%( : ) =
 	bf-handle-command				% count++ [t] ti [c] ci {true|err-msg false}
 	{
-		%redraw
+		redraw
 		%pause
 		bf-check-end
 		{ msg-end = false }{ true }ifelse
@@ -575,7 +575,7 @@
 % tape ti code ci steps
 /bf-continue-n
 {
-    0 1 rot
+    dec 0 1 rot
     {
         pop
         bf-next
@@ -601,6 +601,7 @@
 	0 3 1 roll
 	[0] 0					% [code] 0 [tape] 0
 	2swap					% [tape] 0 [code] 0
+	erasepage
     draw-tape-border
 } def
 
