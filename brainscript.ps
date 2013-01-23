@@ -25,7 +25,7 @@
 % Globals
 
 /max-size 50000 def
-/output [ 0 max-size string] def
+/output [ 0 0 max-size string] def
 /pauselength 5000000 def
 /tape_cellcount 7 def
 /tape_cellwidth 75 def
@@ -170,11 +170,16 @@
 % modifies output
 % TODO: make output larger if needed
 {
-    output dup 1 get            % get array, int output array
-    exch 0 get                  % get index, int array index
-    rot put                     % store
-    output dup 0 get            % output index
-    inc 0 exch put              % index + 1 back to output
+    dup output dup 2 get        % v v [ out ] (str)
+    exch 1 get dup 4 1 roll     % v i v (str) i
+    rot put                     % v i
+    inc output flip 			% v output 1++
+    1 exch put        			% v
+    10 eq 						% newline?
+    {
+    	output dup 0 get 		% [ ] n
+    	inc 0 exch put
+    }if
 } def
 
 
@@ -309,9 +314,6 @@
 	moveto
 	show
 } def
-
-
-
 
 
 
