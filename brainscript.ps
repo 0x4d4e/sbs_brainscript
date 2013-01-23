@@ -33,6 +33,8 @@
 /code_cellwidth 25 def
 /cellheight 20 def
 
+/output-lines 10 def
+
 /Courier findfont 10 scalefont setfont
 
 
@@ -209,6 +211,7 @@
     %erase-tape
 	draw-tape
     %draw-tape2
+    draw-output
 } def
 
 
@@ -316,7 +319,17 @@
 } def
 
 
+/draw-output
+{
+	output dup 0 get 				% [ out ] n
+	output-lines sub 0 max 			% [ out ] start-line
 
+	%TODO: cut off last output-lines
+	/lc 0 def
+	exch 2 get
+	20 100 moveto
+	show
+} def
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
