@@ -30,7 +30,7 @@
 /output [ 0 max-size string] def
 /pauselength 5000000 def
 
-/Helvetica findfont 10 scalefont setfont
+/Courier findfont 10 scalefont setfont
 
 
 /err-jump 	{ (\nFailed to find matching ']'!) } def
@@ -200,13 +200,21 @@
 {
 	%erasepage
 	%draw-code
+    %erase-tape
 	draw-tape
-
+    %draw-tape2
 
 
 } def
 
-
+/draw-tape2
+{
+    2swap
+    flip dup % code cin tin tape tape
+    20 500 moveto
+    { intToHex show ( | ) show } forall
+    flip 2swap
+} def
 
 /draw-code
 {
@@ -216,41 +224,59 @@
 
 
 
-
-
+/erase-tape-cell
+{
+    newpath
+    moveto
+    0 19 rlineto
+    74 0 rlineto
+    0 -19 rlineto
+    closepath
+    1 setgray
+    fill
+    0 setgray
+} def
 
 /draw-tape
 {
 	2swap
 	flip dup
-	length 0 1 rot dec {
+    length dup 8 lt { } { pop 8 } ifelse
+	0 1 rot dec {
 		2 copy
 		get flip						% v i
-		75 mul 20 add 500 				% x = 20 + (i * 75), y = 500
-		3 2 roll draw-tape-cell			% x y v + draw
+		75 mul 21 add 501 				% x = 20 + (i * 75), y = 500
+        2 copy erase-tape-cell
+		3 2 roll intToHex draw-tape-cell			% x y v + draw
 	} for
 	flip
 	2swap
 } def
 
+/draw-tape-border
+% x y
+{
+    
+	0 1 8 {
+		75 mul 20 add 500 				% x = 20 + (i * 75), y = 500
+		newpath
+    	moveto
+    	0 20 rlineto
+	    75 0 rlineto
+    	0 -20 rlineto
+	    closepath
+    	stroke
+	} for
 
+} def
 
 /draw-tape-cell
 % Stack: x y v --
 {
-	3 1 roll 2 copy
-	newpath
-	moveto
-	0 20 rlineto
-	75 0 rlineto
-	0 -20 rlineto
-	closepath
-	stroke
-
+    3 1 roll 
 	%TODO: format output
 	5 add flip 5 add flip
 	moveto
-	int-to-str
 	show
 } def
 
@@ -488,7 +514,7 @@
 
 	{
 		redraw
-		pause
+		%pause
 		bf-check-end
 		{ msg-end = false }{ true }ifelse
 	}
