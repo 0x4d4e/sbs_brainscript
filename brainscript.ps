@@ -33,7 +33,11 @@
 /code_cellwidth 25 def
 /cellheight 20 def
 
-/output-lines 10 def
+/output_lines 20 def
+/output_width 760 def
+/output_height 380 def
+/output_x 40 def
+/output_y 380 def
 
 /Courier findfont 10 scalefont setfont
 
@@ -211,7 +215,7 @@
     %erase-tape
 	draw-tape
     %draw-tape2
-    %draw-output
+    draw-output
 } def
 
 
@@ -332,18 +336,33 @@
 } def
 
 
-	
+
+
+/draw-output-erase
+% Stack:  --
+{
+    newpath
+    output_x 20 sub output_y 20 add moveto
+    0 output_height 20 add neg rlineto
+    output_width 0 rlineto
+    0 output_height 20 add rlineto
+    closepath
+    1 setgray
+    stroke
+    fill
+    0 setgray
+} def
+
 /draw-output
 {
-	output dup 0 get 				% [ out ] n
-	output-lines sub 0 max 			% [ out ] start-line
-
-	%TODO: cut off last output-lines
-	%/lc 0 def
-	exch 2 get
-	20 100 moveto
+	% overwrites old output
+	draw-output-erase
+	% no limit on lines, numlines 1st element in output
+	output dup 2 get 		% [ output ] ( str )
+	exch 1 get 				% ( str ) len
+	0 exch getinterval
+	20 400 moveto
 	show
-	pop 							% pop start-line, not used now
 } def
 
 
