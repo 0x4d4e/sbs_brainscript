@@ -211,7 +211,7 @@
     %erase-tape
 	draw-tape
     %draw-tape2
-    draw-output
+    %draw-output
 } def
 
 
@@ -332,17 +332,18 @@
 } def
 
 
-
+	
 /draw-output
 {
 	output dup 0 get 				% [ out ] n
 	output-lines sub 0 max 			% [ out ] start-line
 
 	%TODO: cut off last output-lines
-	/lc 0 def
+	%/lc 0 def
 	exch 2 get
 	20 100 moveto
 	show
+	pop 							% pop start-line, not used now
 } def
 
 
