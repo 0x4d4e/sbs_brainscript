@@ -27,7 +27,7 @@
 /max-size 50000 def
 /output [ 0 0 max-size string] def
 /pauselength 5000000 def
-/tape_cellcount 7 def
+/tape_cellcount 11 def
 /tape_cellwidth 75 def
 /code_cellcount 21 def
 /code_cellwidth 25 def
@@ -216,7 +216,7 @@
 
 
 
-/erase-tape-cell
+/tape-erase-cell
 {
     newpath
     moveto
@@ -231,10 +231,10 @@
 
 
 
-/draw-tape
+% tape tin -> tape tin padding [ ( ) ( ) ... ]
+/tape-padding
 {
-	2swap
-	2 copy dup                          % tape tin tin
+    2 copy dup                          % tape tin tin
     tape_cellcount 2 idiv sub dup            % tape tin cellstart cellstart
     0 lt                                % tape tin cellstart
         {                               % tin zu weit links, leere zellen davor
@@ -248,33 +248,57 @@
             pop 0 [ ]
         }
     ifelse                              % tape tin padding [ strings ]
+} def
+
+% tape tin padding [ ( ) ( ) ( ) ... ] -> [ ( ) ( ) ( ) .. ] [ (content1) (content2) ... ]
+/tape-content
+{
     [
-    5 2 roll dup                        % [ s ] [ tape tin padding padding
-    tape_cellcount 2 idiv flip sub           % tape tin padding toleft
-    3 -1 roll flip sub                       % tape padding leftindex
-    dup tape_cellcount dec 4 -1 roll sub add % tape lindex rindex
-    2 index length dec min              % tape lindex min(rindex/length--)
-    1 flip
-    {                                   % tape i
-        over flip get intToHex          % tape string
-        flip
-    } for
-    pop ]
-    
-    % tape tin [ ] [ ]
-    concat-array
+        5 2 roll dup                        % [ s ] [ tape tin padding padding
+        tape_cellcount 2 idiv flip sub           % tape tin padding toleft
+        3 -1 roll flip sub                  % tape padding leftindex
+        dup tape_cellcount dec 
+        4 -1 roll sub add                   % tape lindex rindex
+        2 index length dec min              % tape lindex min(rindex/length--)
+        1 flip
+        {                                   % tape i
+            over flip get intToHex          % tape string
+            flip
+        } for
+        pop 
+    ]
+} def
+
+/tape-erase
+{
     0 1 tape_cellcount
     {
-        tape_cellwidth mul 21 add 501 erase-tape-cell
+        tape_cellwidth mul 21 add 501 tape-erase-cell
     } for
+} def
+
+% [ strings ]
+/tape-content-draw
+{
     dup length dec 0 1 3 -1 roll        % for 0, < length, ++
     { %strings i
         2 copy
         get flip                       % strings string i
-        tape_cellwidth mul 21 add 501      % strings string x y
-        3 2 roll draw-tape-cell
+        tape_cellwidth mul 25 add 505      % strings string x y
+        moveto
+        show
     } for
     pop
+} def
+
+/draw-tape
+{
+	2swap
+    tape-padding
+    tape-content
+    concat-array
+    tape-erase
+    tape-content-draw
 	2swap
 } def
 
@@ -284,7 +308,7 @@
     
 	0 1 tape_cellcount dec {
 		
-		tape_cellwidth mul cellheight add 500 				% x = 20 + (i * 75), y = 500
+		tape_cellwidth mul 20 add 500 				% x = 20 + (i * 75), y = 500
 		newpath
     	moveto
     	0 cellheight rlineto
@@ -296,7 +320,7 @@
 	gsave
 	2 setlinewidth 1 0 0 setrgbcolor					% draw red border
 	tape_cellcount 2 idiv
-	tape_cellwidth mul cellheight add 500 					% x = 20 + (i * 75), y = 500
+	tape_cellwidth mul 20 add 500 					% x = 20 + (i * 75), y = 500
 	newpath
 	moveto
 	0 cellheight rlineto
@@ -307,16 +331,6 @@
 	grestore
 } def
 
-
-/draw-tape-cell
-% Stack: x y v --
-{
-    3 1 roll 
-	%TODO: format output
-	5 add flip 5 add flip
-	moveto
-	show
-} def
 
 
 /draw-output
