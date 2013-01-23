@@ -17,8 +17,6 @@
 %	- output/graphics
 %	- modes (stepwise, continue, )
 % 	- breakpoints (#)
-% 	- command handlers return status code true/false to avoid 
-%	  setting index in case of failed loops
 
 
 
@@ -29,8 +27,11 @@
 /max-size 50000 def
 /output [ 0 max-size string] def
 /pauselength 5000000 def
-/cellcount 9 def
-/celllength 75 def
+/tape_cellcount 11 def
+/tape_cellwidth 75 def
+/code_cellcount 21 def
+/code_cellwidth 25 def
+/cellheight 20 def
 
 /Courier findfont 10 scalefont setfont
 
@@ -159,7 +160,7 @@
 
 /int-to-str
 {
-	20 string cvs
+	5 string cvs
 } def
 
 
@@ -177,6 +178,11 @@
 } def
 
 
+/concat-array
+%Stack: [] [] -- []
+{
+    exch [ 3 1 roll aload pop counttomark -1 roll aload pop ]
+} def
 
 
 
@@ -194,20 +200,11 @@
 % main redraw
 % Stack tape ti code ci -- tape ti code ci
 {
-	%erasepage
 	%draw-code
     %erase-tape
 	draw-tape
     %draw-tape2
-
-
 } def
-
-/draw-code
-{
-	2 copy
-} def
-
 
 
 
@@ -215,25 +212,22 @@
 {
     newpath
     moveto
-    0 19 rlineto
-    74 0 rlineto
-    0 -19 rlineto
+    0 cellheight 2 sub rlineto
+    tape_cellwidth 2 sub 0 rlineto
+    0 cellheight 2 sub neg rlineto
     closepath
     1 setgray
     fill
     0 setgray
 } def
 
-/concat
-{
-    exch [ 3 1 roll aload pop counttomark -1 roll aload pop ]
-} def
+
 
 % tape tin -> tape tin padding [ ( ) ( ) ... ]
 /tape-padding
 {
     2 copy dup                          % tape tin tin
-    cellcount 2 idiv sub dup            % tape tin cellstart cellstart
+    tape_cellcount 2 idiv sub dup            % tape tin cellstart cellstart
     0 lt                                % tape tin cellstart
         {                               % tin zu weit links, leere zellen davor
             -1 mul                      % +cellstart
@@ -253,9 +247,10 @@
 {
     [
         5 2 roll dup                        % [ s ] [ tape tin padding padding
-        cellcount 2 idiv flip sub           % tape tin padding toleft
+        tape_cellcount 2 idiv flip sub           % tape tin padding toleft
         3 -1 roll flip sub                  % tape padding leftindex
-        dup cellcount dec 4 -1 roll sub add % tape lindex rindex
+        dup tape_cellcount dec 
+        4 -1 roll sub add                   % tape lindex rindex
         2 index length dec min              % tape lindex min(rindex/length--)
         1 flip
         {                                   % tape i
@@ -268,9 +263,9 @@
 
 /tape-erase
 {
-    0 1 cellcount
+    0 1 tape_cellcount
     {
-        celllength mul 21 add 501 tape-erase-cell
+        tape_cellwidth mul 21 add 501 tape-erase-cell
     } for
 } def
 
@@ -281,7 +276,7 @@
     { %strings i
         2 copy
         get flip                       % strings string i
-        celllength mul 25 add 505      % strings string x y
+        tape_cellwidth mul 25 add 505      % strings string x y
         moveto
         show
     } for
@@ -293,7 +288,7 @@
 	2swap
     tape-padding
     tape-content
-    concat
+    concat-array
     tape-erase
     tape-content-draw
 	2swap
@@ -302,21 +297,31 @@
 /draw-tape-border
 % x y
 {
-	0 1 8 {
-		75 mul 20 add 500 				% x = 20 + (i * 75), y = 500
+    
+	0 1 tape_cellcount dec {
+		
+		tape_cellwidth mul 20 add 500 				% x = 20 + (i * 75), y = 500
 		newpath
     	moveto
-    	0 20 rlineto
-	    75 0 rlineto
-    	0 -20 rlineto
+    	0 cellheight rlineto
+	    tape_cellwidth 0 rlineto
+    	0 cellheight neg rlineto
 	    closepath
     	stroke
 	} for
-
+	gsave
+	2 setlinewidth 1 0 0 setrgbcolor					% draw red border
+	tape_cellcount 2 idiv
+	tape_cellwidth mul 20 add 500 					% x = 20 + (i * 75), y = 500
+	newpath
+	moveto
+	0 cellheight rlineto
+    tape_cellwidth 0 rlineto
+	0 cellheight neg rlineto
+    closepath
+	stroke
+	grestore
 } def
-
-
-
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -584,7 +589,7 @@
 % tape ti code ci steps
 /bf-continue-n
 {
-    0 1 rot
+    dec 0 1 rot
     {
         pop
         bf-next
@@ -610,6 +615,7 @@
 	0 3 1 roll
 	[0] 0					% [code] 0 [tape] 0
 	2swap					% [tape] 0 [code] 0
+	erasepage
     draw-tape-border
 } def
 
@@ -657,6 +663,6 @@
 
 /bf-exit
 {
-	clear
-	()=
+	pop pop pop pop
+	=only ( Instructions)=
 } def
