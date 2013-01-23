@@ -178,14 +178,7 @@
 
 
 
-/case
-% Stack: dict key -- execute dict value
-{
-	2 copy							% make copy of dict and value
-	known not 						% check if value not in dict
-	{ pop /Default }if				% get default value
-	get exec 						% get and exec dict value otherwise
-} bind def
+
 
 
 
@@ -504,10 +497,20 @@
 	91 		{ jump-r }							% [
 	93 		{ jump-l }							% ]
 
-	%TODO: # as breakpoint, ! sometimes recognised (??)
+	%TODO: # as breakpoint
 
 	/Default 	{ inc true }
 >> def
+
+
+/case
+% Stack: dict key -- execute dict value
+{
+	2 copy							% make copy of dict and value
+	known not 						% check if value not in dict
+	{ pop /Default }if				% get default value
+	get exec 						% get and exec dict value otherwise
+} bind def
 
 
 
@@ -531,19 +534,27 @@
 } def
 
 
-% TODO: add status flag to all commands to abort if invalid input
-% ?? brainfuck should (and now does) ignore non-commands, arrays throw rangecheck error for out-of-bounds access
-/bf-next
-% Stack: [tape] ti [code] ci --[tape] tin [code] cin {true|false}
+
+/bf-inc-counter
 {
-	2 copy							% [t] ti [c] ci [c] ci
-	get								% .....         command
+	5 -1 roll
+	inc
+	5 1 roll
+} def
+
+
+
+/bf-next
+% Stack: count [tape] ti [code] ci -- count++ [tape] tin [code] cin {true|false}
+{
+	bf-inc-counter					% count++ [t] ti [c] ci
+	2 copy							% count++ [t] ti [c] ci [c] ci
+	get								% count++ [t] ti [c] ci [c] ci command
 	%(> ) = dup print-char 			% print current command
 	%( : ) =
-	bf-handle-command				% interpret current command
-
+	bf-handle-command				% count++ [t] ti [c] ci {true|err-msg false}
 	{
-		redraw
+		%redraw
 		%pause
 		bf-check-end
 		{ msg-end = false }{ true }ifelse
@@ -584,24 +595,13 @@
 
 
 
-/bf-cwp
-{
-	{
-		bf-next
-		redraw
-        not { exit }if
-	} loop
-} def
-
-
-
 /bf-init
-% Stack: [code] 0 --
+% Stack: [code] 0 -- 0 [t] 0 [c] 0
 {
+	0 3 1 roll
 	[0] 0					% [code] 0 [tape] 0
 	2swap					% [tape] 0 [code] 0
     draw-tape-border
-
 } def
 
 
@@ -610,14 +610,12 @@
 % Stack (filename) --
 {
 	read-file
-
 	bf-load
 } def
 
 
-
 /bf-load
-% Stack: (input) --
+% Stack: (input) -- 0 [t] 0 [c] 0
 {
 	dup length 0 eq {(Empty input!\n)= clear stop} if
 
@@ -627,8 +625,29 @@
 
 
 
+
+/bf-run-file
+%Stack: (filename) --
+{
+	bf-load-file
+	bf-continue
+	bf-exit
+} def
+
+
+
+/bf-run
+%Stack: (bf-code) --
+{
+	bf-load
+	bf-continue
+	bf-exit
+} def
+
+
+
 /bf-exit
 {
 	clear
-	()=						% newline at end of execution
+	()=
 } def
