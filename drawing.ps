@@ -7,14 +7,10 @@
 /draw-basics
 {
 	draw-status-title
-    /cellcount { tape_cellcount } def
-    /cellwidth { tape_cellwidth } def
-    /celly { tape_y } def
-	draw-tape-border
-    /cellcount { code_cellcount } def
-    /cellwidth { code_cellwidth } def
-    /celly { code_y } def
-    draw-tape-border
+    set-tape
+	draw-cell-border
+    set-code
+    draw-cell-border
 } def
 
 
@@ -39,7 +35,7 @@
 } def
 
 
-/tape-erase-cell
+/cell-erase
 {
     newpath
     moveto
@@ -53,7 +49,7 @@
 } def
 
 % tape tin -> tape tin padding [ ( ) ( ) ... ]
-/tape-padding
+/cell-padding
 {
     2 copy dup                          % tape tin tin
     cellcount 2 idiv sub dup            % tape tin cellstart cellstart
@@ -72,7 +68,7 @@
 } def
 
 % tape tin padding [ ( ) ( ) ( ) ... ] -> [ ( ) ( ) ( ) .. ] [ (content1) (content2) ... ]
-/tape-content
+/cell-content
 {
     [
         5 2 roll dup                        % [ s ] [ tape tin padding padding
@@ -90,18 +86,16 @@
     ]
 } def
 
-
-
-/tape-erase
+/erase-cells
 {
     0 1 cellcount
     {
-        cellwidth mul 21 add celly 1 add tape-erase-cell
+        cellwidth mul 21 add celly 1 add cell-erase
     } for
 } def
 
 % [ strings ]
-/tape-content-draw
+/cell-content-draw
 {
     dup length dec 0 1 3 -1 roll        % for 0, < length, ++
     { %strings i
@@ -114,34 +108,44 @@
     pop
 } def
 
-/draw-tape
+/set-tape
 {
     /cellwidth { tape_cellwidth } def
     /cellcount { tape_cellcount } def
     /celly { tape_y } def
     /cellconvert { intToHex } def
-	2swap
-    tape-padding
-    tape-content
-    concat-array
-    tape-erase
-    tape-content-draw
-	2swap
 } def
 
-/draw-code {
+/set-code
+{
     /cellwidth { code_cellwidth } def
     /cellcount { code_cellcount } def
     /celly { code_y } def
     /cellconvert { charToString } def
-    tape-padding
-    tape-content
-    concat-array
-    tape-erase
-    tape-content-draw
 } def
 
-/draw-tape-border
+/draw-tape
+{
+	set-tape
+    2swap
+    cell-padding
+    cell-content
+    concat-array
+    cell-erase
+    cell-content-draw
+	2swap
+} def
+
+/draw-code {
+    set-code
+    cell-padding
+    cell-content
+    concat-array
+    cell-erase
+    cell-content-draw
+} def
+
+/draw-cell-border
 % x y
 {
     
