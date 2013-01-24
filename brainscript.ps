@@ -51,10 +51,10 @@
 
 /Courier findfont 10 scalefont setfont
 
-/err-jump 	{ (\nFailed to find matching ']'!) } def
-/err-loop 	{ (\nFailed to find matching '['!) } def
-/err-under 	{ (\nLeft shift index < 0!) } def
-/msg-end 	{ (\n> Ended <) } def
+/err-jump 	{ (Failed to find matching ']'!) } def
+/err-loop 	{ (Failed to find matching '['!) } def
+/err-under 	{ (Left shift index < 0!) } def
+/msg-end 	{ (> Ended <) } def
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -467,7 +467,7 @@
 		bf-check-end
 		{ msg-end dup draw-status = false }{ true }ifelse
 	}
-	{ = false }ifelse
+	{ dup draw-status = false }ifelse
 } def
 
 
