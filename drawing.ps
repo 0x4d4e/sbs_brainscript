@@ -21,6 +21,7 @@
     %erase-tape
 	draw-tape
     draw-code
+    dup 3 index draw-indizes
     %draw-tape2
     draw-output
 } def
@@ -66,6 +67,37 @@
     grestore
 } def
 
+
+
+/erase-index
+{
+    newpath
+    5 sub moveto
+    0 20 rlineto
+    75 0 rlineto
+    0 -20 rlineto
+    closepath
+    1 setgray
+    fill
+    0 setgray
+} def
+
+
+/draw-indizes
+% ci ti --
+{
+    gsave
+    tape_cellcount 2 idiv tape_cellwidth mul 35 add tape_y 30 add
+    2 copy erase-index
+    2 copy moveto
+    /Courier findfont 14 scalefont setfont
+    3 2 roll 5str show
+    50 sub
+    2 copy erase-index
+    moveto
+    5str show
+    grestore
+} def
 
 
 /instr-erase
