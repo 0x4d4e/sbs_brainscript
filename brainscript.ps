@@ -33,6 +33,8 @@
 /code_cellwidth 25 def
 /cellheight 20 def
 
+
+
 /output_lines 20 def
 /output_line_height 10 def
 /output_width 760 def
@@ -40,6 +42,10 @@
 /output_x 40 def
 /output_y 380 def
 /output_redraw false def
+
+
+/instructions_x 20 def
+/instructions_y 570 def
 
 /Courier findfont 10 scalefont setfont
 
@@ -218,6 +224,13 @@
 
 
 
+/draw-basics
+{
+	draw-instructions-title
+	draw-tape-border
+} def
+
+
 /redraw
 % main redraw
 % Stack tape ti code ci -- tape ti code ci
@@ -229,6 +242,13 @@
     draw-output
 } def
 
+
+/draw-instructions-title
+% Stack: --
+{
+	instructions_x instructions_y moveto
+	(Instructions: ) show
+} def
 
 
 /tape-erase-cell
@@ -680,8 +700,8 @@
         pop
         bf-next
         not { exit }if
-        redraw
     } for
+    redraw
 } def
 
 
@@ -706,6 +726,7 @@
 		bf-next
         not { exit }if
 	} loop
+	redraw
 } def
 
 
