@@ -27,13 +27,13 @@
 /max-size 50000 def
 /output [ [] 0 max-size string] def
 /pauselength 100 def
-/tape_cellcount 11 def
+/tape_cellcount 9 def
 /tape_cellwidth 75 def
-/code_cellcount 21 def
+/tape_y 500 def
+/code_cellcount 27 def
 /code_cellwidth 25 def
+/code_y 450 def
 /cellheight 20 def
-
-
 
 /output_lines 20 def
 /output_line_height 10 def
@@ -44,11 +44,10 @@
 /output_redraw false def
 
 
-/instructions_x 20 def
-/instructions_y 570 def
+/status_x 20 def
+/status_y 570 def
 
 /Courier findfont 10 scalefont setfont
-
 
 /err-jump 	{ (\nFailed to find matching ']'!) } def
 /err-loop 	{ (\nFailed to find matching '['!) } def
@@ -121,6 +120,9 @@
 	} if
 } def
 
+/charToString {
+    1 string flip over 0 3 -1 roll put
+} def
 
 /pause
 {
@@ -213,221 +215,6 @@
 % Stack: pauselength --
 {
 	/pauselength flip def
-} def
-
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-% drawing
-
-
-
-/draw-basics
-{
-	draw-instructions-title
-	draw-tape-border
-} def
-
-
-/redraw
-% main redraw
-% Stack tape ti code ci -- tape ti code ci
-{
-	%draw-code
-    %erase-tape
-	draw-tape
-    %draw-tape2
-    draw-output
-} def
-
-
-/draw-instructions-title
-% Stack: --
-{
-	instructions_x instructions_y moveto
-	(Instructions: ) show
-} def
-
-
-/tape-erase-cell
-{
-    newpath
-    moveto
-    0 cellheight 2 sub rlineto
-    tape_cellwidth 2 sub 0 rlineto
-    0 cellheight 2 sub neg rlineto
-    closepath
-    1 setgray
-    fill
-    0 setgray
-} def
-
-
-
-% tape tin -> tape tin padding [ ( ) ( ) ... ]
-/tape-padding
-{
-    2 copy dup                          % tape tin tin
-    tape_cellcount 2 idiv sub dup            % tape tin cellstart cellstart
-    0 lt                                % tape tin cellstart
-        {                               % tin zu weit links, leere zellen davor
-            -1 mul                      % +cellstart
-            [ 
-                over 1 1 3 -1 roll      % for(1,<=cellstart,++)
-                { pop (         ) } for
-            ]                           % tape tin cellstart [ strings ]
-        }
-        { 
-            pop 0 [ ]
-        }
-    ifelse                              % tape tin padding [ strings ]
-} def
-
-% tape tin padding [ ( ) ( ) ( ) ... ] -> [ ( ) ( ) ( ) .. ] [ (content1) (content2) ... ]
-/tape-content
-{
-    [
-        5 2 roll dup                        % [ s ] [ tape tin padding padding
-        tape_cellcount 2 idiv flip sub           % tape tin padding toleft
-        3 -1 roll flip sub                  % tape padding leftindex
-        dup tape_cellcount dec 
-        4 -1 roll sub add                   % tape lindex rindex
-        2 index length dec min              % tape lindex min(rindex/length--)
-        1 flip
-        {                                   % tape i
-            over flip get intToHex          % tape string
-            flip
-        } for
-        pop 
-    ]
-} def
-
-/tape-erase
-{
-    0 1 tape_cellcount
-    {
-        tape_cellwidth mul 21 add 501 tape-erase-cell
-    } for
-} def
-
-% [ strings ]
-/tape-content-draw
-{
-    dup length dec 0 1 3 -1 roll        % for 0, < length, ++
-    { %strings i
-        2 copy
-        get flip                       % strings string i
-        tape_cellwidth mul 25 add 505      % strings string x y
-        moveto
-        show
-    } for
-    pop
-} def
-
-/draw-tape
-{
-	2swap
-    tape-padding
-    tape-content
-    concat-array
-    tape-erase
-    tape-content-draw
-	2swap
-} def
-
-/draw-tape-border
-% x y
-{
-    
-	0 1 tape_cellcount dec {
-		
-		tape_cellwidth mul 20 add 500 				% x = 20 + (i * 75), y = 500
-		newpath
-    	moveto
-    	0 cellheight rlineto
-	    tape_cellwidth 0 rlineto
-    	0 cellheight neg rlineto
-	    closepath
-    	stroke
-	} for
-	gsave
-	2 setlinewidth 1 0 0 setrgbcolor					% draw red border
-	tape_cellcount 2 idiv
-	tape_cellwidth mul 20 add 500 					% x = 20 + (i * 75), y = 500
-	newpath
-	moveto
-	0 cellheight rlineto
-    tape_cellwidth 0 rlineto
-	0 cellheight neg rlineto
-    closepath
-	stroke
-	grestore
-} def
-
-
-
-
-/draw-output-erase
-% Stack:  --
-{
-    newpath
-    output_x 20 sub output_y 20 add moveto
-    0 output_height 20 add neg rlineto
-    output_width 0 rlineto
-    0 output_height 20 add rlineto
-    closepath
-    1 setgray
-    fill
-    0 setgray
-} def
-
-
-/get-lines
-% Stack (str) -- [(line1)(line2)...]
-{
-	[ exch (\n)
-	{
-		search
-		{
-			3 1 roll
-		}{
-			exit
-		}ifelse
-	} loop
-	]
-} def
-
-
-/draw-output
-{
-	output_redraw {
-		% overwrites old output
-		draw-output-erase
-		% no limit on lines, numlines 1st element in output
-		output {} forall						% [ nlines ] i (str)
-		3 -1 roll 								% i (str) [nl]
-		dup length output_lines lt 				% i (str) [nl] nl<outlins
-		{
-			pop 0 								% i (str) 0
-		}{
-			dup length output_lines sub get 	% i (str) i_n
-		}ifelse
-		3 2 roll over sub 						% (str) start count
-		getinterval								% (print-substring)
-		get-lines								% [ lines ]
-		dup length 0 1 3 2 roll dec
-		{
-			2 copy get 					% [ lines ] i v
-			exch output_line_height mul 
-			output_y exch sub
-			output_x exch moveto
-			show
-		} for
-		pop
-		/output_redraw false def
-	} if
 } def
 
 
@@ -734,6 +521,7 @@
 /bf-init
 % Stack: [code] 0 -- 0 [t] 0 [c] 0
 {
+    (drawing.ps) run
 	/output [ [] 0 max-size string] def
 	0 3 1 roll
 	[0] 0					% [code] 0 [tape] 0
