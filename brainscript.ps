@@ -25,7 +25,7 @@
 % Globals
 
 /max-size 50000 def
-/output [ 0 0 max-size string] def
+/output [ [] 0 max-size string] def
 /pauselength 5000000 def
 /tape_cellcount 11 def
 /tape_cellwidth 75 def
@@ -34,6 +34,7 @@
 /cellheight 20 def
 
 /output_lines 20 def
+/output_line_height 10 def
 /output_width 760 def
 /output_height 380 def
 /output_x 40 def
@@ -183,8 +184,10 @@
     1 exch put        			% v
     10 eq 						% newline?
     {
-    	output dup 0 get 		% [ ] n
-    	inc 0 exch put
+    	output dup 0 get 		% [ out ] [ newlines ]
+    	[ output 1 get dec ]	% [ out ] [ new lines ]
+    	concat-array
+    	0 exch put
     }if
 } def
 
@@ -340,6 +343,7 @@
 
 /draw-output-erase
 % Stack:  --
+%FIXME: does not overdraw
 {
     newpath
     output_x 20 sub output_y 20 add moveto
@@ -347,22 +351,54 @@
     output_width 0 rlineto
     0 output_height 20 add rlineto
     closepath
-    1 setgray
+    %1 setgray
     stroke
     fill
     0 setgray
 } def
+
+
+/get-lines
+% Stack (str) -- [(line1)(line2)...]
+{
+	[ exch (\n)
+	{
+		search
+		{
+			3 1 roll
+		}{
+			exit
+		}ifelse
+	} loop
+	]
+} def
+
 
 /draw-output
 {
 	% overwrites old output
 	draw-output-erase
 	% no limit on lines, numlines 1st element in output
-	output dup 2 get 		% [ output ] ( str )
-	exch 1 get 				% ( str ) len
-	0 exch getinterval
-	20 400 moveto
-	show
+	output {} forall						% [ nlines ] i (str)
+	3 -1 roll 								% i (str) [nl]
+	dup length output_lines lt 				% i (str) [nl] nl<outlins
+	{
+		pop 0 								% i (str) 0
+	}{
+		dup length output_lines sub get 	% i (str) i_n
+	}ifelse
+	3 2 roll over sub 						% (str) start count
+	getinterval								% (print-substring)
+	get-lines								% [ lines ]
+	dup length 0 1 3 2 roll dec
+	{
+		2 copy get 					% [ lines ] i v
+		exch output_line_height mul 
+		output_y exch sub
+		output_x exch moveto
+		show
+	} for
+	pop
 } def
 
 
