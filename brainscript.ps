@@ -26,7 +26,7 @@
 
 /max-size 50000 def
 /output [ [] 0 max-size string] def
-/pauselength 100 def
+/pauselength 500 def
 
 /tape_cellcount 9 def
 /tape_cellwidth 75 def
@@ -36,24 +36,25 @@
 /code_y 450 def
 /cellheight 20 def
 
-/output_lines 20 def
-/output_line_height 10 def
+/output_lines 30 def
+/output_line_height 14 def
 /output_width 760 def
-/output_height 380 def
+/output_height 420 def
 /output_x 40 def
-/output_y 380 def
+/output_y 420 def
 /output_redraw false def
 
 
 /status_x 20 def
 /status_y 570 def
+/status_offset 130 def
 
 /Courier findfont 10 scalefont setfont
 
 /err-jump 	{ (\nFailed to find matching ']'!) } def
 /err-loop 	{ (\nFailed to find matching '['!) } def
 /err-under 	{ (\nLeft shift index < 0!) } def
-/msg-end 	{ (\n\n> Ended) } def
+/msg-end 	{ (\n> Ended <) } def
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -464,7 +465,7 @@
 	bf-handle-command				% count++ [t] ti [c] ci {true|err-msg false}
 	{
 		bf-check-end
-		{ msg-end = false }{ true }ifelse
+		{ msg-end dup draw-status = false }{ true }ifelse
 	}
 	{ = false }ifelse
 } def
@@ -478,6 +479,8 @@
 	redraw
 } def
 
+
+/s { bf-step } def
 
 
 % tape ti code ci steps
@@ -493,8 +496,11 @@
 } def
 
 
+/cn { bf-continue-n } def
 
-/bf-cpn
+
+
+/cpn
 {
     dec 0 1 rot
     {
@@ -516,6 +522,9 @@
 	} loop
 	redraw
 } def
+
+
+/c { bf-continue } def
 
 
 
@@ -548,6 +557,7 @@
 
 	str-to-array 0			% [code] 0
 	bf-init
+	redraw
 } def
 
 
@@ -578,3 +588,6 @@
 	pop pop pop pop
 	=only ( Instructions)=
 } def
+
+
+/q { bf-exit } def

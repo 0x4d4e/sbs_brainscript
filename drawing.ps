@@ -2,8 +2,6 @@
 %
 % drawing
 
-
-
 /draw-basics
 {
 	draw-status-title
@@ -16,8 +14,9 @@
 
 /redraw
 % main redraw
-% Stack tape ti code ci -- tape ti code ci
+% Stack i tape ti code ci -- i tape ti code ci
 {
+    4 index draw-instr-count
 	%draw-code
     %erase-tape
 	draw-tape
@@ -30,8 +29,70 @@
 /draw-status-title
 % Stack: --
 {
-	status_x status_y moveto
+    gsave
+    /Courier findfont 14 scalefont setfont
+	status_x status_y 2 copy moveto
 	(Status: ) show
+    20 sub moveto
+    (Instructions: ) show
+    grestore
+} def
+
+
+
+/status-erase
+{
+    newpath
+    status_x status_offset add 10 sub status_y 5 sub moveto
+    0 25 rlineto
+    700 0 rlineto
+    0 -25 rlineto
+    closepath
+    1 setgray
+    fill
+    0 setgray
+} def
+
+
+/draw-status
+% Stack: (status) --
+{
+    gsave
+    status-erase
+    /Courier findfont 14 scalefont setfont
+    status_x status_offset add status_y moveto
+    1 0 0 setrgbcolor
+    show
+    grestore
+} def
+
+
+
+/instr-erase
+{
+    newpath
+    status_x status_offset add 10 sub status_y 25 sub moveto
+    0 25 rlineto
+    700 0 rlineto
+    0 -25 rlineto
+    closepath
+    1 setgray
+    fill
+    0 setgray
+} def
+
+
+/draw-instr-count
+% count --
+{
+    gsave
+    instr-erase
+    /Courier findfont 14 scalefont setfont
+    status_x status_offset add status_y 20 sub moveto
+    %1 0 0 setrgbcolor
+    20 string cvs
+    show
+    grestore
 } def
 
 
@@ -208,6 +269,8 @@
 {
 	output_redraw {
 		% overwrites old output
+        gsave
+        /Courier findfont 14 scalefont setfont
 		draw-output-erase
 		% no limit on lines, numlines 1st element in output
 		output {} forall						% [ nlines ] i (str)
@@ -231,5 +294,6 @@
 		} for
 		pop
 		/output_redraw false def
+        grestore
 	} if
 } def
