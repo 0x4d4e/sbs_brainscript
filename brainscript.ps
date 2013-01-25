@@ -123,6 +123,7 @@
 } def
 
 /charToString {
+% Stack: (char) as Int -- ( (X) )
     1 string flip over 0 3 -1 roll put
 } def
 
@@ -138,8 +139,6 @@
   pop
 } def
 
-
-
 /read-file
 % Stack: (filename) --(content)
 {
@@ -154,8 +153,6 @@
 {
 	(%stdin) (r) file 1 string readstring false eq {(input error) =} if
 } def
-
-
 
 /str-to-array
 % Stack: (str) -- [ chars ]
@@ -227,8 +224,6 @@
 %
 % brainfuck interpretation
 
-
-
 /increment
 % Stack: tape ti code ci -- tape([ti] + 1) ti code ci+1 true
 {
@@ -240,8 +235,6 @@
 	true
 } def
 
-
-
 /decrement
 % Stack: tape ti code ci -- tape([ti] - 1) ti code ci+1 true
 {
@@ -252,8 +245,6 @@
 	inc
 	true
 } def
-
-
 
 /print
 % prints char at current tape cell
@@ -269,8 +260,6 @@
 	true
 } def
 
-
-
 /read
 % reads input from stdin and stores in current tape cell
 {
@@ -282,8 +271,6 @@
 	true
 } def
 
-
-
 /right
 % Stack: tape ti code ci -- tape ti+1 code ci+1 true
 {
@@ -294,8 +281,6 @@
 	true
 } def
 
-
-
 /inc-tape
 % Stack: [tape] ti -- [tape] ti+1 true
 {
@@ -303,8 +288,6 @@
 	2 copy exch length ge						% ge just to be safe
 	{ mark 3 -1 roll aload pop 0 ] exch } if 	% grow tape 1 element if index equal length
 } def
-
-
 
 /left
 % Stack: tape ti code ci -- tape ti-1 code ci+1 {true | err-msg false}
@@ -323,8 +306,6 @@
 	} ifelse
 } def
 
-
-
 /jump-r
 % Stack tape ti code ci -- tape ti code cin {true | error-msg false}
 {
@@ -341,7 +322,6 @@
         { err-jump false} ifelse
 	} ifelse
 } def
-
 
 
 /jump-end
@@ -368,8 +348,6 @@
 	lc 0 eq 						% get result status, lc == 0 => success
 } def
 
-
-
 /jump-l
 % Stack: code ci -- code cin {true | error-msg false}
 {
@@ -393,8 +371,6 @@
 	lc 0 ne { err-loop false }{ true }ifelse		% check count and set result flag
 } def
 
-
-
 % Dict of brainfuck commands and their corresponding execution tokens
 /bf-commands
 <<
@@ -410,11 +386,8 @@
 	91 		{ jump-r }							% [
 	93 		{ jump-l }							% ]
 
-	%TODO: # as breakpoint
-
 	/Default 	{ inc true }
 >> def
-
 
 /case
 % Stack: dict key -- execute dict value
@@ -426,15 +399,12 @@
 } bind def
 
 
-
 /bf-handle-command
 % Stack: command --
 {
 	//bf-commands exch					% <<commands>> command
 	case
 } def
-
-
 
 /bf-check-end
 % Stack: [tape] ti [code] ci -- [tape] ti [code] ci true|false
@@ -446,16 +416,13 @@
 	{ true } { false } ifelse
 } def
 
-
-
 /bf-inc-counter
+% Stack count [tape] ti [code] ci -- count++ [tape] ti [code] ci
 {
 	5 -1 roll
 	inc
 	5 1 roll
 } def
-
-
 
 /bf-next
 % Stack: count [tape] ti [code] ci -- count++ [tape] tin [code] cin {true|false}
@@ -473,18 +440,12 @@
 	{ dup draw-status = false }ifelse
 } def
 
-
-
 /bf-step
 {
 	bf-next
 	pop
 	redraw
 } def
-
-
-/s { bf-step } def
-
 
 % tape ti code ci steps
 /bf-continue-n
@@ -499,10 +460,6 @@
 } def
 
 
-/cn { bf-continue-n } def
-
-
-
 /cpn
 {
     dec 0 1 rot
@@ -515,8 +472,6 @@
     } for
 } def
 
-
-
 /bf-continue
 {
 	{
@@ -525,11 +480,6 @@
 	} loop
 	redraw
 } def
-
-
-/c { bf-continue } def
-
-
 
 /bf-init
 % Stack: [code] 0 -- 0 [t] 0 [c] 0
@@ -543,15 +493,12 @@
     draw-basics
 } def
 
-
-
 /bf-load-file
 % Stack (filename) --
 {
 	read-file
 	bf-load
 } def
-
 
 /bf-load
 % Stack: (input) -- 0 [t] 0 [c] 0
@@ -563,9 +510,6 @@
 	redraw
 } def
 
-
-
-
 /bf-run-file
 %Stack: (filename) --
 {
@@ -573,8 +517,6 @@
 	bf-continue
 	bf-exit
 } def
-
-
 
 /bf-run
 %Stack: (bf-code) --
@@ -584,13 +526,18 @@
 	bf-exit
 } def
 
-
-
 /bf-exit
 {
 	pop pop pop pop
 	=only ( Instructions)=
 } def
 
+%%% Shortcuts
 
+/s { bf-step } def
+/c { bf-continue } def
+/cn { bf-continue-n } def
 /q { bf-exit } def
+
+
+

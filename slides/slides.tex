@@ -69,6 +69,8 @@
 > + . > .               '!\n'
     \end{verbatim}
 
+    400 Instructions
+
 \end{frame}
 
 
@@ -89,6 +91,8 @@
 >>+>+<<<-]>>>[<<<+>>>-]<<[<+>-]>[<+>-]<<<-]
     \end{verbatim}
 
+    183510 Instructions
+
 \end{frame}
 
 \begin{frame}{Aktueller Stand}
@@ -97,22 +101,28 @@
         \item Interpreter
         \item Programm aus Datei oder als String vom Stack lesen
         \item Instruktionsweises Ausführen des Programms
+        \item X Instruktionen ausführen
+        \item Code bis zum Ende ausführen
         \item Input von stdin lesen (immer nur 1 Char)
-        \item Output ausgeben (stdout und Array)
     \end{itemize}
 
 \end{frame}
 
-\begin{frame}{TODO - Visualisierung, Wrapper}
+\begin{frame}{Visualisierung}
 
     \begin{itemize}
-        \item PS-Output: Instruktionsspeicher + aktuelle Position
-        \item PS-Output: Datenspeicher + aktuelle Position
-        \item PS-Output: bisheriger Output
-        \item Wrapper (bash,C?) für komfortable, interaktive Kontrolle
-        \item (mehr) Fehlerbehandlung
+        \item Datenspeicherausschnitt (``Tape'')
+        \item Codeausschnitt
+        \item Aktueller Status \\Instructioncounter, Tape- und Codeposition, Fehlermeldung
+        \item Programm-Output
     \end{itemize}
-
 \end{frame}
 
+\begin{frame}{Sprachspezifische Features}
+    \begin{itemize}
+        \item Mapping zw. BF-Instruktionen und PS-Prozeduren mit Dictionary
+        \item "generische" Methoden zum Zeichnen von Tape und Code
+        \item kurze Prozeduren, 4 wichtigsten Werte oben am Stack
+    \end{itemize}
+\end{frame}
 \end{document}
